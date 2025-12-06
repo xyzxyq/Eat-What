@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 空间存在，检查用户
-        const existingUser = coupleSpace.users.find(u => u.nickname === nickname)
+        const existingUser = coupleSpace.users.find((u: { nickname: string }) => u.nickname === nickname)
 
         if (existingUser) {
             // 用户已存在，直接登录
