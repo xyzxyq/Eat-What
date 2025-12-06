@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model CoupleSpace {
+  id             String    @id @default(uuid())
+  passphraseHash String    @unique
+  createdAt      DateTime  @default(now())
+  users          User[]
+  moments        Moment[]
+}
+
+model User {
+  id            String      @id @default(uuid())
+  nickname      String
+  avatarEmoji   String      @default("💕")
+  coupleSpaceId String
+  createdAt     DateTime    @default(now())
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  moments       Moment[]
+  
+  @@unique([coupleSpaceId, nickname])
+}
+
+model Moment {
+  id            String      @id @default(uuid())
+  content       String
+  mediaUrl      String?
+  mediaType     String      @default("none")
+  userId        String
+  coupleSpaceId String
+  momentDate    DateTime
+  createdAt     DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id])
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  
+  @@unique([userId, momentDate])
+}
