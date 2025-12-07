@@ -7,9 +7,9 @@ export default function HomePage() {
       <header className="border-b border-[var(--hf-border)] bg-white">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-3xl">🍽️</span>
+            <span className="text-3xl"><img src="/eat_what_logo.png" alt="Eat What" className="w-10 h-10 rounded-lg" /></span>
             <div>
-              <h1 className="text-xl font-bold text-[var(--hf-text)] mono">
+              <h1 className="text-xl font-bold text-[var(--hf-text)] logo-font">
                 Eat_What
               </h1>
               <p className="text-xs text-[var(--hf-text-muted)]">
@@ -55,7 +55,18 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-[var(--hf-border)] py-4 text-center">
         <p className="text-xs text-[var(--hf-text-muted)] mono">
-          Made with 💛 for couples
+          © {new Date().getFullYear()} Eat_What. Made with 💛 for couples.
+        </p>
+        <p className="text-xs text-[var(--hf-text-muted)] mt-1">
+          <a
+            href="https://github.com/xyzxyq/Eat-What"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--hf-yellow)] transition"
+          >
+            GitHub
+          </a>
+          {' • MIT License • v0.1.0'}
         </p>
       </footer>
     </div>

@@ -55,7 +55,7 @@ export default function LoginForm() {
                     <span className="text-[var(--hf-text-muted)]">口令</span>
                 </label>
                 <input
-                    type="password"
+                    type="text"
                     value={passphrase}
                     onChange={(e) => setPassphrase(e.target.value)}
                     placeholder="输入你们的专属暗号..."

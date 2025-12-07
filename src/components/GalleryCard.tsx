@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import UserAvatar from '@/components/UserAvatar'
 
 interface UserData {
     id: string
     nickname: string
     avatarEmoji: string
+    avatarUrl?: string | null
 }
 
 interface MomentData {
@@ -146,8 +148,8 @@ export default function GalleryCard({ moment, currentUserId, onUpdate }: Gallery
                         key={emoji}
                         onClick={() => handleReaction(emoji)}
                         className={`px-2 py-1 rounded-full text-sm border transition ${data.hasReacted
-                                ? 'bg-[var(--hf-yellow-light)] border-[var(--hf-yellow)]'
-                                : 'bg-[var(--hf-bg-alt)] border-[var(--hf-border)] hover:border-[var(--hf-yellow)]'
+                            ? 'bg-[var(--hf-yellow-light)] border-[var(--hf-yellow)]'
+                            : 'bg-[var(--hf-bg-alt)] border-[var(--hf-border)] hover:border-[var(--hf-yellow)]'
                             }`}
                         title={data.users.join(', ')}
                     >
@@ -199,7 +201,11 @@ export default function GalleryCard({ moment, currentUserId, onUpdate }: Gallery
                             <div key={comment.id}>
                                 {/* Main Comment */}
                                 <div className="flex gap-2">
-                                    <span>{comment.user.avatarEmoji}</span>
+                                    <UserAvatar
+                                        avatarUrl={comment.user.avatarUrl}
+                                        avatarEmoji={comment.user.avatarEmoji}
+                                        size="sm"
+                                    />
                                     <div className="flex-1">
                                         <div className="bg-[var(--hf-bg-alt)] rounded-lg p-2">
                                             <span className="font-semibold text-sm">{comment.user.nickname}</span>
@@ -230,7 +236,11 @@ export default function GalleryCard({ moment, currentUserId, onUpdate }: Gallery
                                     <div className="ml-8 mt-2 space-y-2">
                                         {comment.replies.map(reply => (
                                             <div key={reply.id} className="flex gap-2">
-                                                <span className="text-sm">{reply.user.avatarEmoji}</span>
+                                                <UserAvatar
+                                                    avatarUrl={reply.user.avatarUrl}
+                                                    avatarEmoji={reply.user.avatarEmoji}
+                                                    size="sm"
+                                                />
                                                 <div className="flex-1">
                                                     <div className="bg-[var(--hf-bg-alt)] rounded-lg p-2">
                                                         <span className="font-semibold text-sm">{reply.user.nickname}</span>

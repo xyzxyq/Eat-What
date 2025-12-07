@@ -1,3 +1,5 @@
+import UserAvatar from '@/components/UserAvatar'
+
 interface MomentData {
     id: string
     content: string
@@ -9,6 +11,7 @@ interface MomentData {
         id: string
         nickname: string
         avatarEmoji: string
+        avatarUrl?: string | null
     }
 }
 
@@ -31,9 +34,11 @@ export default function MomentCard({ moment, isCurrentUser }: MomentCardProps) {
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                    <div className="emoji-avatar">
-                        {moment.user.avatarEmoji}
-                    </div>
+                    <UserAvatar
+                        avatarUrl={moment.user.avatarUrl}
+                        avatarEmoji={moment.user.avatarEmoji}
+                        size="lg"
+                    />
                     <div>
                         <p className="font-semibold text-[var(--hf-text)]">
                             {moment.user.nickname}

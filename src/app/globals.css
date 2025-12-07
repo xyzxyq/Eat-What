@@ -1,10 +1,10 @@
 /* Google Fonts - Must be first */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @import "tailwindcss";
 
 :root {
-  /* Hugging Face Theme Colors */
+  /* Hugging Face Theme Colors - Default Yellow */
   --hf-yellow: #FFD21E;
   --hf-yellow-light: #FFF3C7;
   --hf-yellow-dark: #E5B800;
@@ -17,6 +17,46 @@
 
   --background: #FFFFFF;
   --foreground: #1F2937;
+}
+
+/* Theme: Pink */
+[data-theme="pink"] {
+  --hf-yellow: #EC4899;
+  --hf-yellow-light: #FCE7F3;
+  --hf-yellow-dark: #DB2777;
+  --hf-border-hover: #EC4899;
+}
+
+/* Theme: Blue */
+[data-theme="blue"] {
+  --hf-yellow: #3B82F6;
+  --hf-yellow-light: #DBEAFE;
+  --hf-yellow-dark: #2563EB;
+  --hf-border-hover: #3B82F6;
+}
+
+/* Theme: Purple */
+[data-theme="purple"] {
+  --hf-yellow: #8B5CF6;
+  --hf-yellow-light: #EDE9FE;
+  --hf-yellow-dark: #7C3AED;
+  --hf-border-hover: #8B5CF6;
+}
+
+/* Theme: Green */
+[data-theme="green"] {
+  --hf-yellow: #10B981;
+  --hf-yellow-light: #D1FAE5;
+  --hf-yellow-dark: #059669;
+  --hf-border-hover: #10B981;
+}
+
+/* Theme: Orange */
+[data-theme="orange"] {
+  --hf-yellow: #F97316;
+  --hf-yellow-light: #FFEDD5;
+  --hf-yellow-dark: #EA580C;
+  --hf-border-hover: #F97316;
 }
 
 @theme inline {
@@ -32,6 +72,14 @@
   --color-hf-border: var(--hf-border);
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-logo: 'Fredoka', 'Nunito', 'Poppins', sans-serif;
+}
+
+/* Logo font class */
+.logo-font {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
 body {
@@ -215,6 +263,7 @@ body {
 
 /* Small phones */
 @media (max-width: 480px) {
+
   /* Reduce base font size */
   html {
     font-size: 14px;
@@ -259,6 +308,7 @@ body {
 
 /* Tablets and larger phones */
 @media (max-width: 768px) {
+
   /* Reduce container padding */
   .hf-card {
     padding: 1.25rem;
@@ -270,7 +320,7 @@ body {
     gap: 0.75rem;
   }
 
-  .mobile-stack > * {
+  .mobile-stack>* {
     width: 100%;
   }
 
@@ -283,6 +333,7 @@ body {
 
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
+
   /* Larger touch targets */
   .hf-button {
     min-height: 44px;

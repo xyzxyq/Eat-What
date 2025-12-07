@@ -3,12 +3,14 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import GalleryCard from '@/components/GalleryCard'
+import UserAvatar from '@/components/UserAvatar'
 import confetti from 'canvas-confetti'
 
 interface UserData {
     id: string
     nickname: string
     avatarEmoji: string
+    avatarUrl?: string | null
     status: string
 }
 
@@ -164,8 +166,11 @@ export default function GalleryPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[var(--hf-bg)] flex items-center justify-center">
-                <div className="spinner" style={{ width: 48, height: 48 }}></div>
+            <div className="min-h-screen bg-[var(--hf-bg-alt)] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="text-4xl mb-4 animate-bounce">💕</div>
+                    <p className="text-[var(--hf-text-muted)]">加载中...</p>
+                </div>
             </div>
         )
     }
@@ -247,7 +252,11 @@ export default function GalleryPage() {
                         {/* Current User Column Header */}
                         <div className="hf-card p-3">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="text-2xl">{currentUser?.avatarEmoji}</span>
+                                <UserAvatar
+                                    avatarUrl={currentUser?.avatarUrl}
+                                    avatarEmoji={currentUser?.avatarEmoji}
+                                    size="lg"
+                                />
                                 <span className="font-semibold text-[var(--hf-text)]">{currentUser?.nickname}</span>
                                 <span className="text-xs text-[var(--hf-text-muted)]">(我)</span>
                             </div>
@@ -336,7 +345,11 @@ export default function GalleryPage() {
                         {/* Partner Column Header */}
                         <div className="hf-card p-3">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="text-2xl">{partner?.avatarEmoji}</span>
+                                <UserAvatar
+                                    avatarUrl={partner?.avatarUrl}
+                                    avatarEmoji={partner?.avatarEmoji}
+                                    size="lg"
+                                />
                                 <span className="font-semibold text-[var(--hf-text)]">{partner?.nickname}</span>
                             </div>
                             <div className="text-sm text-[var(--hf-text-muted)]">
@@ -409,6 +422,24 @@ export default function GalleryPage() {
                     </div>
                 )}
             </main>
+
+            {/* Footer */}
+            <footer className="border-t border-[var(--hf-border)] bg-white py-4 mt-8">
+                <div className="max-w-4xl mx-auto px-4 text-center text-xs text-[var(--hf-text-muted)]">
+                    <p className="mono">© {new Date().getFullYear()} Eat_What. Made with 💛 for couples.</p>
+                    <p className="mt-1">
+                        <a
+                            href="https://github.com/xyzxyq/Eat-What"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-[var(--hf-yellow)] transition"
+                        >
+                            GitHub
+                        </a>
+                        {' • MIT License • v0.1.0'}
+                    </p>
+                </div>
+            </footer>
         </div>
     )
 }

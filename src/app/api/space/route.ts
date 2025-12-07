@@ -15,7 +15,8 @@ export async function GET() {
         })
 
         return NextResponse.json({
-            startDate: coupleSpace?.startDate || null
+            startDate: coupleSpace?.startDate || null,
+            theme: coupleSpace?.theme || 'yellow'
         })
     } catch (error) {
         console.error('Get space error:', error)
@@ -23,7 +24,7 @@ export async function GET() {
     }
 }
 
-// 更新开始日期
+// 更新空间设置
 export async function PUT(request: NextRequest) {
     try {
         const session = await getSession()
@@ -31,19 +32,32 @@ export async function PUT(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { startDate } = await request.json()
+        const body = await request.json()
+        const updateData: Record<string, unknown> = {}
+
+        if ('startDate' in body) {
+            updateData.startDate = body.startDate ? new Date(body.startDate) : null
+        }
+
+        if ('theme' in body) {
+            const validThemes = ['yellow', 'pink', 'blue', 'purple', 'green', 'orange']
+            if (validThemes.includes(body.theme)) {
+                updateData.theme = body.theme
+            }
+        }
 
         const coupleSpace = await prisma.coupleSpace.update({
             where: { id: session.coupleSpaceId },
-            data: { startDate: startDate ? new Date(startDate) : null }
+            data: updateData
         })
 
         return NextResponse.json({
             success: true,
-            startDate: coupleSpace.startDate
+            startDate: coupleSpace.startDate,
+            theme: coupleSpace.theme
         })
     } catch (error) {
-        console.error('Update start date error:', error)
+        console.error('Update space error:', error)
         return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
 }

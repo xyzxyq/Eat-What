@@ -10,22 +10,32 @@ model CoupleSpace {
   id             String    @id @default(uuid())
   passphraseHash String    @unique
   startDate      DateTime?
+  theme          String    @default("yellow")
   createdAt      DateTime  @default(now())
   users          User[]
   moments        Moment[]
+  wishes         Wish[]
 }
 
 model User {
-  id            String      @id @default(uuid())
-  nickname      String
-  avatarEmoji   String      @default("💕")
-  status        String      @default("")
-  coupleSpaceId String
-  createdAt     DateTime    @default(now())
-  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
-  moments       Moment[]
-  comments      Comment[]
-  reactions     Reaction[]
+  id                String        @id @default(uuid())
+  nickname          String
+  displayName       String?
+  gender            String?
+  avatarEmoji       String        @default("💕")
+  avatarUrl         String?
+  status            String        @default("")
+  isProfileComplete Boolean       @default(false)
+  coupleSpaceId     String
+  createdAt         DateTime      @default(now())
+  coupleSpace       CoupleSpace   @relation(fields: [coupleSpaceId], references: [id])
+  moments           Moment[]
+  comments          Comment[]
+  reactions         Reaction[]
+  wishesCreated     Wish[]        @relation("WishCreator")
+  wishesEdited      Wish[]        @relation("WishEditor")
+  wishVotes         WishVote[]
+  wishComments      WishComment[]
   
   @@unique([coupleSpaceId, nickname])
 }
@@ -70,4 +80,46 @@ model Reaction {
   user      User     @relation(fields: [userId], references: [id])
   
   @@unique([momentId, userId, emoji])
+}
+
+model Wish {
+  id             String        @id @default(uuid())
+  content        String
+  isCompleted    Boolean       @default(false)
+  coupleSpaceId  String
+  createdById    String
+  lastEditedById String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  coupleSpace    CoupleSpace   @relation(fields: [coupleSpaceId], references: [id])
+  createdBy      User          @relation("WishCreator", fields: [createdById], references: [id])
+  lastEditedBy   User?         @relation("WishEditor", fields: [lastEditedById], references: [id])
+  votes          WishVote[]
+  comments       WishComment[]
+}
+
+model WishVote {
+  id        String   @id @default(uuid())
+  wishId    String
+  userId    String
+  count     Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  wish      Wish     @relation(fields: [wishId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+  
+  @@unique([wishId, userId])
+}
+
+model WishComment {
+  id        String        @id @default(uuid())
+  content   String
+  wishId    String
+  userId    String
+  parentId  String?
+  createdAt DateTime      @default(now())
+  wish      Wish          @relation(fields: [wishId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id])
+  parent    WishComment?  @relation("WishCommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   WishComment[] @relation("WishCommentReplies")
 }
