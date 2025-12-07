@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import WishCard, { WishData } from '@/components/WishCard'
+import WishImportModal from '@/components/WishImportModal'
 
 interface UserInfo {
     id: string
@@ -25,6 +26,7 @@ export default function WishesPage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [sortMode, setSortMode] = useState<SortMode>('time')
     const [filterMode, setFilterMode] = useState<FilterMode>('all')
+    const [showImportModal, setShowImportModal] = useState(false)
 
     const fetchWishes = useCallback(async () => {
         try {
@@ -248,7 +250,15 @@ export default function WishesPage() {
                     <div className="back-btn" onClick={() => router.push('/timeline')}>
                         ← 返回时间线
                     </div>
-                    <h1 className="page-title">✨ 我们想做的事</h1>
+                    <div className="flex items-center justify-between">
+                        <h1 className="page-title">✨ 我们想做的事</h1>
+                        <button
+                            onClick={() => setShowImportModal(true)}
+                            className="px-3 py-1.5 rounded-full bg-[var(--hf-yellow-light)] border border-[var(--hf-yellow)] text-sm hover:shadow-md transition flex items-center gap-1"
+                        >
+                            📥 导入
+                        </button>
+                    </div>
 
                     <div className="stats-bar">
                         <button
@@ -355,6 +365,16 @@ export default function WishesPage() {
                     </p>
                 </div>
             </footer>
+
+            {/* Import Modal */}
+            <WishImportModal
+                isOpen={showImportModal}
+                onClose={() => setShowImportModal(false)}
+                onImport={() => {
+                    fetchWishes()
+                    setShowImportModal(false)
+                }}
+            />
         </div>
     )
 }
