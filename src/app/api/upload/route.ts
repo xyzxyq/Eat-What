@@ -16,20 +16,53 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
         }
 
-        // 验证文件类型
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm']
-        if (!allowedTypes.includes(file.type)) {
+        // 验证文件类型 - 支持更多移动端格式
+        // HEIC/HEIF: iPhone 默认格式
+        // BMP/TIFF: 常见图片格式
+        // MOV: iPhone 视频格式
+        const allowedImageTypes = [
+            'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+            'image/heic', 'image/heif',  // iPhone 照片
+            'image/bmp', 'image/tiff'
+        ]
+        const allowedVideoTypes = [
+            'video/mp4', 'video/webm',
+            'video/quicktime',  // MOV 格式
+            'video/x-m4v'
+        ]
+        const allowedTypes = [...allowedImageTypes, ...allowedVideoTypes]
+
+        // 如果无法识别类型，尝试通过扩展名判断
+        const ext = file.name.split('.').pop()?.toLowerCase()
+        const extToMime: Record<string, string> = {
+            'heic': 'image/heic',
+            'heif': 'image/heif',
+            'mov': 'video/quicktime',
+            'jpg': 'image/jpeg',
+            'jpeg': 'image/jpeg',
+            'png': 'image/png',
+            'gif': 'image/gif',
+            'webp': 'image/webp',
+            'mp4': 'video/mp4',
+            'webm': 'video/webm'
+        }
+
+        const effectiveType = file.type || (ext ? extToMime[ext] : '')
+        const isAllowed = allowedTypes.includes(file.type) ||
+            (ext && Object.keys(extToMime).includes(ext))
+
+        if (!isAllowed) {
             return NextResponse.json(
-                { error: '只支持 JPG, PNG, GIF, WebP 图片和 MP4, WebM 视频哦 📷' },
+                { error: '支持 JPG, PNG, GIF, WebP, HEIC (iPhone), MP4, MOV 格式 📷' },
                 { status: 400 }
             )
         }
 
-        // 验证文件大小（最大 50MB）
-        const maxSize = 50 * 1024 * 1024
+        // 验证文件大小（最大 100MB - 放宽限制）
+        const maxSize = 100 * 1024 * 1024
         if (file.size > maxSize) {
             return NextResponse.json(
-                { error: '文件太大啦，最大支持 50MB 📦' },
+                { error: '文件太大啦，最大支持 100MB 📦' },
                 { status: 400 }
             )
         }

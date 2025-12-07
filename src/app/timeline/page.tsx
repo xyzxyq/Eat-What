@@ -127,24 +127,26 @@ export default function TimelinePage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                         <button
                             onClick={() => router.push('/wishes')}
-                            className="text-sm text-[var(--hf-text-muted)] hover:text-[var(--hf-text)] transition flex items-center gap-1"
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-[var(--hf-yellow-light)] to-white border border-[var(--hf-yellow)] hover:shadow-md transition-all flex items-center gap-1"
                         >
-                            ✨ <span className="hidden sm:inline">我们想做的事</span>
+                            <span className="text-sm sm:text-base">✨</span>
+                            <span className="text-xs sm:text-sm font-medium text-[var(--hf-text)]">心愿</span>
                         </button>
 
                         <button
                             onClick={() => router.push('/gallery')}
-                            className="text-sm text-[var(--hf-text-muted)] hover:text-[var(--hf-text)] transition flex items-center gap-1"
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-pink-50 to-white border border-pink-200 hover:shadow-md transition-all flex items-center gap-1"
                         >
-                            💕 <span className="hidden sm:inline">我们的日子</span>
+                            <span className="text-sm sm:text-base">💕</span>
+                            <span className="text-xs sm:text-sm font-medium text-[var(--hf-text)]">日记</span>
                         </button>
 
                         <button
                             onClick={handleLogout}
-                            className="text-sm text-[var(--hf-text-muted)] hover:text-[var(--hf-text)] transition"
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-xs sm:text-sm text-[var(--hf-text-muted)]"
                         >
                             退出
                         </button>
