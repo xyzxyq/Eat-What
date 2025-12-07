@@ -107,6 +107,13 @@ export default function TimelinePage() {
                         </div>
 
                         <button
+                            onClick={() => router.push('/gallery')}
+                            className="text-sm text-[var(--hf-text-muted)] hover:text-[var(--hf-text)] transition flex items-center gap-1"
+                        >
+                            💕 <span className="hidden sm:inline">我们的日子</span>
+                        </button>
+
+                        <button
                             onClick={handleLogout}
                             className="text-sm text-[var(--hf-text-muted)] hover:text-[var(--hf-text)] transition"
                         >

@@ -9,6 +9,7 @@ datasource db {
 model CoupleSpace {
   id             String    @id @default(uuid())
   passphraseHash String    @unique
+  startDate      DateTime?
   createdAt      DateTime  @default(now())
   users          User[]
   moments        Moment[]
@@ -18,10 +19,13 @@ model User {
   id            String      @id @default(uuid())
   nickname      String
   avatarEmoji   String      @default("💕")
+  status        String      @default("")
   coupleSpaceId String
   createdAt     DateTime    @default(now())
   coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
   moments       Moment[]
+  comments      Comment[]
+  reactions     Reaction[]
   
   @@unique([coupleSpaceId, nickname])
 }
@@ -37,6 +41,33 @@ model Moment {
   createdAt     DateTime    @default(now())
   user          User        @relation(fields: [userId], references: [id])
   coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  comments      Comment[]
+  reactions     Reaction[]
   
   @@unique([userId, momentDate])
+}
+
+model Comment {
+  id        String    @id @default(uuid())
+  content   String
+  momentId  String
+  userId    String
+  parentId  String?
+  createdAt DateTime  @default(now())
+  moment    Moment    @relation(fields: [momentId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+}
+
+model Reaction {
+  id        String   @id @default(uuid())
+  emoji     String
+  momentId  String
+  userId    String
+  createdAt DateTime @default(now())
+  moment    Moment   @relation(fields: [momentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+  
+  @@unique([momentId, userId, emoji])
 }

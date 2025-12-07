@@ -49,28 +49,13 @@ export default function HomePage() {
             <LoginForm />
           </div>
 
-          {/* Features */}
-          <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-            <div className="p-3">
-              <div className="text-2xl mb-2">📅</div>
-              <p className="text-xs text-[var(--hf-text-muted)]">每日一记</p>
-            </div>
-            <div className="p-3">
-              <div className="text-2xl mb-2">🔒</div>
-              <p className="text-xs text-[var(--hf-text-muted)]">私密空间</p>
-            </div>
-            <div className="p-3">
-              <div className="text-2xl mb-2">📸</div>
-              <p className="text-xs text-[var(--hf-text-muted)]">图片视频</p>
-            </div>
-          </div>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-[var(--hf-border)] py-4 text-center">
         <p className="text-xs text-[var(--hf-text-muted)] mono">
-          Made with 💛 for couples • Hugging Face Style
+          Made with 💛 for couples
         </p>
       </footer>
     </div>
