@@ -97,9 +97,19 @@
 - 📆 纪念日计数器
 - 📚 照片回顾
 
+### ☁️ 云端存储
+- 📤 图片/视频自动上传至 Cloudinary
+- 🔄 自动压缩优化，节省空间
+- 🌐 全球 CDN 加速访问
+
+### 📱 移动端适配
+- � 响应式设计，支持各种屏幕尺寸
+- 👆 触摸友好的大按钮区域
+- 📱 iPhone 刘海屏安全区适配
+
 ---
 
-## 🛠️ 技术栈
+## �🛠️ 技术栈
 
 | 分类 | 技术 |
 |:----:|:-----|
@@ -109,6 +119,7 @@
 | **数据库** | Supabase PostgreSQL |
 | **ORM** | Prisma 7 |
 | **认证** | JWT (jose) |
+| **存储** | Cloudinary (图片/视频云存储) |
 | **部署** | Zeabur |
 
 ---
@@ -132,7 +143,14 @@ npm install
 DATABASE_URL="你的 Supabase 连接字符串"
 DIRECT_URL="你的 Supabase 直接连接"
 JWT_SECRET="随机安全字符串"
+
+# Cloudinary (图片云存储)
+CLOUDINARY_CLOUD_NAME="你的 Cloud Name"
+CLOUDINARY_API_KEY="你的 API Key"
+CLOUDINARY_API_SECRET="你的 API Secret"
 ```
+
+> 💡 Cloudinary 免费套餐提供 25GB 存储 + 25GB 带宽/月
 
 ### 4️⃣ 初始化数据库
 ```bash

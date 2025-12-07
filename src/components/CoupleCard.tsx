@@ -294,6 +294,56 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                         transform: translateY(-50%);
                     }
                 }
+
+                /* Mobile responsive styles */
+                @media (max-width: 480px) {
+                    .couple-card {
+                        padding: 12px;
+                        border-radius: 16px;
+                    }
+
+                    .heart-connector {
+                        font-size: 1.5rem;
+                    }
+
+                    .name-text {
+                        font-size: 0.75rem;
+                    }
+
+                    .status-bubble {
+                        padding: 3px 8px;
+                        font-size: 10px;
+                        max-width: 70px;
+                    }
+
+                    .sparkle {
+                        width: 3px;
+                        height: 3px;
+                    }
+
+                    .floating-emoji {
+                        font-size: 12px;
+                    }
+
+                    .orbit-emoji {
+                        font-size: 10px;
+                    }
+                }
+
+                @media (max-width: 375px) {
+                    .couple-card {
+                        padding: 10px;
+                    }
+
+                    .heart-connector {
+                        font-size: 1.25rem;
+                    }
+
+                    .floating-emoji,
+                    .orbit-emoji {
+                        display: none;
+                    }
+                }
             `}</style>
 
             {/* Sparkles */}
@@ -312,7 +362,7 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 <div key={`orbit-${i}`} className="orbit-emoji">{emoji}</div>
             ))}
 
-            <div className="flex items-center justify-center gap-4 relative z-10">
+            <div className="flex items-center justify-center gap-2 sm:gap-4 relative z-10">
                 {/* Current User */}
                 {currentUser ? (
                     <div className="avatar-container">

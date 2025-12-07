@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
-import { existsSync } from 'fs'
+import cloudinary from '@/lib/cloudinary'
 
 export async function POST(request: NextRequest) {
     try {
@@ -36,35 +34,44 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // 创建上传目录
-        const today = new Date().toISOString().split('T')[0]
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', today)
+        // 检查 Cloudinary 配置
+        console.log('Cloudinary config:', {
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret_exists: !!process.env.CLOUDINARY_API_SECRET
+        })
 
-        if (!existsSync(uploadDir)) {
-            await mkdir(uploadDir, { recursive: true })
-        }
-
-        // 生成唯一文件名
-        const ext = path.extname(file.name)
-        const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(7)}${ext}`
-        const filePath = path.join(uploadDir, uniqueName)
-
-        // 保存文件
+        // 将文件转换为 base64
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
-        await writeFile(filePath, buffer)
+        const base64 = buffer.toString('base64')
+        const dataUri = `data:${file.type};base64,${base64}`
 
-        // 返回可访问的URL
-        const fileUrl = `/uploads/${today}/${uniqueName}`
-        const mediaType = file.type.startsWith('video/') ? 'video' : 'image'
+        console.log('Starting Cloudinary upload...')
+
+        // 上传到 Cloudinary
+        const isVideo = file.type.startsWith('video/')
+        const result = await cloudinary.uploader.upload(dataUri, {
+            folder: 'eat_what',
+            resource_type: isVideo ? 'video' : 'image',
+            transformation: isVideo ? undefined : [
+                { quality: 'auto:good' },
+                { fetch_format: 'auto' }
+            ]
+        })
+
+        console.log('Upload successful:', result.secure_url)
 
         return NextResponse.json({
             success: true,
-            url: fileUrl,
-            mediaType
+            url: result.secure_url,
+            mediaType: isVideo ? 'video' : 'image'
         })
     } catch (error) {
-        console.error('Upload error:', error)
-        return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+        console.error('Upload error details:', error)
+        return NextResponse.json({
+            error: 'Upload failed',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 })
     }
 }

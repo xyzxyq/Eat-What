@@ -365,3 +365,72 @@ body {
     padding-top: env(safe-area-inset-top);
   }
 }
+
+/* Extra small phones (320px-375px) */
+@media (max-width: 375px) {
+  .hf-card {
+    padding: 0.75rem;
+    border-radius: 12px;
+  }
+
+  .hf-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  /* Couple card adjustments for tiny screens */
+  .couple-card {
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+
+  /* Smaller navigation items */
+  header button {
+    font-size: 0.75rem;
+    padding: 0.25rem;
+  }
+
+  /* Timeline content */
+  main {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Mobile landscape mode */
+@media (max-height: 500px) and (orientation: landscape) {
+  .couple-card {
+    padding: 8px !important;
+  }
+
+  header {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+}
+
+/* Improved text wrapping for mobile */
+@media (max-width: 480px) {
+  .truncate-mobile {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
+
+  /* Better card sizing on mobile */
+  .hf-card img,
+  .hf-card video {
+    max-height: 300px;
+    object-fit: cover;
+  }
+
+  /* Ensure footer is readable */
+  footer {
+    padding: 1rem 0.75rem;
+  }
+
+  footer p {
+    font-size: 0.7rem;
+  }
+}
