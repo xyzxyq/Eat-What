@@ -208,3 +208,109 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* ================================
+   Mobile Responsive Styles
+   ================================ */
+
+/* Small phones */
+@media (max-width: 480px) {
+  /* Reduce base font size */
+  html {
+    font-size: 14px;
+  }
+
+  /* Cards - less padding on mobile */
+  .hf-card {
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  /* Buttons - smaller on mobile */
+  .hf-button {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Input fields */
+  .hf-input {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  /* Badge - smaller */
+  .hf-badge {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  /* Emoji avatar - smaller */
+  .emoji-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.25rem;
+  }
+
+  /* Hide long text on mobile */
+  .mobile-hide {
+    display: none !important;
+  }
+}
+
+/* Tablets and larger phones */
+@media (max-width: 768px) {
+  /* Reduce container padding */
+  .hf-card {
+    padding: 1.25rem;
+  }
+
+  /* Stack buttons vertically on narrow screens */
+  .mobile-stack {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mobile-stack > * {
+    width: 100%;
+  }
+
+  /* Full width buttons */
+  .mobile-full-width {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets */
+  .hf-button {
+    min-height: 44px;
+  }
+
+  .hf-input {
+    min-height: 44px;
+  }
+
+  /* Remove hover effects on touch devices */
+  .hf-card:hover {
+    border-color: var(--hf-border);
+    box-shadow: none;
+  }
+
+  .hf-button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Safe area for notched phones */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+}

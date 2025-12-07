@@ -144,7 +144,7 @@ export default function CreateMoment({ onSuccess, disabled }: CreateMomentProps)
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-3 sm:flex-nowrap">
                     <div className="flex items-center gap-2">
                         <input
                             ref={fileInputRef}
@@ -166,7 +166,8 @@ export default function CreateMoment({ onSuccess, disabled }: CreateMomentProps)
                             ) : (
                                 <>
                                     <span>📷</span>
-                                    <span>添加图片/视频</span>
+                                    <span className="hidden sm:inline">添加图片/视频</span>
+                                    <span className="sm:hidden">添加</span>
                                 </>
                             )}
                         </label>

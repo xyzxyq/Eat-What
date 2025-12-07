@@ -41,8 +41,11 @@ export default function MomentCard({ moment, isCurrentUser }: MomentCardProps) {
                                 <span className="ml-2 text-xs text-[var(--hf-text-muted)]">(你)</span>
                             )}
                         </p>
-                        <p className="text-sm text-[var(--hf-text-muted)] mono">
+                        <p className="text-sm text-[var(--hf-text-muted)] mono hidden sm:block">
                             {formattedDate}
+                        </p>
+                        <p className="text-sm text-[var(--hf-text-muted)] mono sm:hidden">
+                            {date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
                         </p>
                     </div>
                 </div>
