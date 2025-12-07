@@ -1,36 +1,99 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍽️ Eat_What - 情侣私密日记
 
-## Getting Started
+> 每天一条，记录我们的专属时光 💕
 
-First, run the development server:
+## 🌐 在线访问
 
+**访问地址**：[https://eat-what.fun](https://eat-what.fun)
+
+## ✨ 功能特点
+
+### 💑 情侣绑定
+- 使用共同的「口令」创建专属空间
+- 每个空间最多绑定两人
+- 无需注册账号，凭口令和爱称即可登录
+
+### 📝 每日一记
+- 时间胶囊机制，以「天」为维度
+- 每人每天仅限发送一条动态（增加仪式感）
+- 支持文本、图片、视频
+
+### 🎨 Hugging Face 风格
+- 黄色主题配色 (#FFD21E)
+- 卡片式布局设计
+- Emoji 图标 + 等宽字体
+
+## 🛠️ 技术栈
+
+| 分类 | 技术 |
+|------|------|
+| 框架 | Next.js 16 (App Router) |
+| 样式 | Tailwind CSS |
+| 数据库 | Supabase PostgreSQL |
+| ORM | Prisma 7 |
+| 认证 | JWT (jose) |
+| 部署 | Zeabur |
+
+## 🚀 本地开发
+
+### 1. 克隆项目
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/xyzxyq/Eat-What.git
+cd Eat-What
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. 安装依赖
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. 配置环境变量
+复制 `.env.example` 为 `.env`，填入你的配置：
+```env
+DATABASE_URL="你的 Supabase 连接字符串"
+DIRECT_URL="你的 Supabase 直接连接"
+JWT_SECRET="随机安全字符串"
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 4. 初始化数据库
+```bash
+npx prisma generate
+npx prisma db push
+```
 
-## Learn More
+### 5. 启动开发服务器
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+访问 [http://localhost:3000](http://localhost:3000)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 项目结构
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── api/              # 后端 API 路由
+│   │   ├── auth/login/   # 登录接口
+│   │   ├── moments/      # 日记 CRUD
+│   │   └── upload/       # 文件上传
+│   ├── timeline/         # 时间线页面
+│   └── page.tsx          # 首页（登录）
+├── components/           # React 组件
+│   ├── LoginForm.tsx
+│   ├── CreateMoment.tsx
+│   └── MomentCard.tsx
+├── lib/
+│   ├── prisma.ts         # 数据库连接
+│   └── auth.ts           # JWT 认证
+└── prisma/
+    └── schema.prisma     # 数据库模型
+```
 
-## Deploy on Vercel
+## 📄 许可证
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+MIT License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+Made with 💛 for couples
