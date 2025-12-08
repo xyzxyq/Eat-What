@@ -69,6 +69,7 @@
 - 🔐 使用共同「口令」创建专属空间
 - 👥 每个空间最多绑定两人
 - 🎭 无需注册，凭口令 + 爱称即可登录
+- 📧 **邮箱验证**：首次登录需绑定邮箱，增强账户安全
 
 ### 📝 每日一记
 - ⏰ 时间胶囊机制，以「天」为维度
@@ -104,9 +105,14 @@
 - 🌐 全球 CDN 加速访问
 
 ### 📱 移动端适配
-- � 响应式设计，支持各种屏幕尺寸
+- 📱 响应式设计，支持各种屏幕尺寸
 - 👆 触摸友好的大按钮区域
 - 📱 iPhone 刘海屏安全区适配
+
+### 📬 邮件通知
+- 💕 伴侣发布新日记时收到邮件提醒
+- 💬 伴侣评论你的日记时收到通知
+- ✨ 伴侣添加新心愿时收到提醒
 
 ---
 
@@ -149,9 +155,14 @@ JWT_SECRET="随机安全字符串"
 CLOUDINARY_CLOUD_NAME="你的 Cloud Name"
 CLOUDINARY_API_KEY="你的 API Key"
 CLOUDINARY_API_SECRET="你的 API Secret"
+
+# Resend (邮件服务)
+RESEND_API_KEY="你的 Resend API Key"
+EMAIL_FROM="Eat_What <noreply@yourdomain.com>"
 ```
 
-> 💡 Cloudinary 免费套餐提供 25GB 存储 + 25GB 带宽/月
+> 💡 Cloudinary 免费套餐提供 25GB 存储 + 25GB 带宽/月  
+> 💡 Resend 免费套餐提供 100封邮件/天
 
 ### 4️⃣ 初始化数据库
 ```bash

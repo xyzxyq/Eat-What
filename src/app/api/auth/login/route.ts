@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
                     nickname: user.nickname,
                     avatarEmoji: user.avatarEmoji
                 },
-                isNewSpace: true
+                isNewSpace: true,
+                needEmailBinding: true  // 新用户需要绑定邮箱
             })
 
             response.cookies.set('auth-token', token, {
@@ -108,7 +109,8 @@ export async function POST(request: NextRequest) {
                     nickname: existingUser.nickname,
                     avatarEmoji: existingUser.avatarEmoji
                 },
-                isNewSpace: false
+                isNewSpace: false,
+                needEmailBinding: !existingUser.isEmailVerified  // 未验证邮箱需要绑定
             })
 
             response.cookies.set('auth-token', token, {
@@ -153,7 +155,8 @@ export async function POST(request: NextRequest) {
                 avatarEmoji: newUser.avatarEmoji
             },
             isNewSpace: false,
-            partnerJoined: true
+            partnerJoined: true,
+            needEmailBinding: true  // 新用户需要绑定邮箱
         })
 
         response.cookies.set('auth-token', token, {

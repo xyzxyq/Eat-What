@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
+import { sendPartnerNotification } from '@/lib/email'
 
 // 获取日记的评论
 export async function GET(request: NextRequest) {
@@ -60,6 +61,9 @@ export async function POST(request: NextRequest) {
             include: { user: true }
         })
 
+        // 异步发送通知给日记作者
+        sendCommentNotification(momentId, session.userId, comment.user, content.trim())
+
         return NextResponse.json({ success: true, comment })
     } catch (error) {
         console.error('Create comment error:', error)
@@ -96,3 +100,34 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ error: 'Server error' }, { status: 500 })
     }
 }
+
+// 异步发送评论通知
+async function sendCommentNotification(
+    momentId: string,
+    commenterId: string,
+    commenter: { displayName: string | null; nickname: string },
+    content: string
+) {
+    try {
+        // 查找日记和作者
+        const moment = await prisma.moment.findUnique({
+            where: { id: momentId },
+            include: { user: true }
+        })
+
+        // 只有评论伴侣的日记时才发送通知（需要开启评论通知）
+        if (moment && moment.userId !== commenterId &&
+            moment.user.isEmailVerified && moment.user.email &&
+            moment.user.notifyOnComment) {
+            await sendPartnerNotification(moment.user.email, {
+                type: 'new_comment',
+                partnerName: commenter.displayName || commenter.nickname,
+                recipientName: moment.user.displayName || moment.user.nickname,
+                content
+            })
+        }
+    } catch (e) {
+        console.error('Failed to send comment notification:', e)
+    }
+}
+

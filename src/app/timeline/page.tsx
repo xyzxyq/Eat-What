@@ -9,6 +9,7 @@ import OnboardingModal from '@/components/OnboardingModal'
 import UserAvatar from '@/components/UserAvatar'
 import ProfilePopup from '@/components/ProfilePopup'
 import CoupleCard from '@/components/CoupleCard'
+import SettingsModal from '@/components/SettingsModal'
 
 interface UserData {
     id: string
@@ -28,6 +29,7 @@ export default function TimelinePage() {
     const [error, setError] = useState('')
     const [showOnboarding, setShowOnboarding] = useState(false)
     const [showProfilePopup, setShowProfilePopup] = useState(false)
+    const [showSettings, setShowSettings] = useState(false)
 
     const fetchMoments = useCallback(async () => {
         try {
@@ -114,6 +116,12 @@ export default function TimelinePage() {
                 />
             )}
 
+            {/* Settings Modal */}
+            <SettingsModal
+                isOpen={showSettings}
+                onClose={() => setShowSettings(false)}
+            />
+
             {/* Header */}
             <header className="sticky top-0 z-50 border-b border-[var(--hf-border)] bg-white">
                 <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -145,10 +153,11 @@ export default function TimelinePage() {
                         </button>
 
                         <button
-                            onClick={handleLogout}
-                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-xs sm:text-sm text-[var(--hf-text-muted)]"
+                            onClick={() => setShowSettings(true)}
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-xs sm:text-sm text-[var(--hf-text-muted)] flex items-center gap-1"
                         >
-                            退出
+                            <span>⚙️</span>
+                            <span className="hidden sm:inline">设置</span>
                         </button>
                     </div>
                 </div>

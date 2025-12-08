@@ -18,26 +18,45 @@ model CoupleSpace {
 }
 
 model User {
-  id                String        @id @default(uuid())
-  nickname          String
-  displayName       String?
-  gender            String?
-  avatarEmoji       String        @default("💕")
-  avatarUrl         String?
-  status            String        @default("")
-  isProfileComplete Boolean       @default(false)
-  coupleSpaceId     String
-  createdAt         DateTime      @default(now())
-  coupleSpace       CoupleSpace   @relation(fields: [coupleSpaceId], references: [id])
-  moments           Moment[]
-  comments          Comment[]
-  reactions         Reaction[]
-  wishesCreated     Wish[]        @relation("WishCreator")
-  wishesEdited      Wish[]        @relation("WishEditor")
-  wishVotes         WishVote[]
-  wishComments      WishComment[]
+  id                  String              @id @default(uuid())
+  nickname            String
+  displayName         String?
+  gender              String?
+  avatarEmoji         String              @default("💕")
+  avatarUrl           String?
+  status              String              @default("")
+  isProfileComplete   Boolean             @default(false)
+  email               String?             @unique  // 邮箱地址，唯一约束
+  isEmailVerified     Boolean             @default(false)  // 邮箱是否已验证
+  // 通知设置（默认关闭）
+  notifyOnMoment      Boolean             @default(false)  // 伴侣发日记时通知
+  notifyOnComment     Boolean             @default(false)  // 伴侣评论时通知
+  notifyOnWish        Boolean             @default(false)  // 伴侣发心愿时通知
+  coupleSpaceId       String
+  createdAt           DateTime            @default(now())
+  coupleSpace         CoupleSpace         @relation(fields: [coupleSpaceId], references: [id])
+  moments             Moment[]
+  comments            Comment[]
+  reactions           Reaction[]
+  wishesCreated       Wish[]              @relation("WishCreator")
+  wishesEdited        Wish[]              @relation("WishEditor")
+  wishVotes           WishVote[]
+  wishComments        WishComment[]
+  emailVerifications  EmailVerification[]
   
   @@unique([coupleSpaceId, nickname])
+}
+
+model EmailVerification {
+  id        String   @id @default(uuid())
+  email     String
+  code      String   // 6位数字验证码
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([email, code])
 }
 
 model Moment {

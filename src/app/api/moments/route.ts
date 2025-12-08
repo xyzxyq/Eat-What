@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
+import { sendPartnerNotification } from '@/lib/email'
 
 // 获取所有日记
 export async function GET() {
@@ -79,6 +80,9 @@ export async function POST(request: NextRequest) {
             include: { user: true }
         })
 
+        // 异步发送通知给伴侣（不阻塞响应）
+        sendNotificationToPartner(session.coupleSpaceId, session.userId, moment.user, content.trim())
+
         return NextResponse.json({
             success: true,
             message: '📝 今日心情已记录！',
@@ -87,5 +91,37 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('Create moment error:', error)
         return NextResponse.json({ error: 'Server error' }, { status: 500 })
+    }
+}
+
+// 异步发送通知（不阻塞主流程）
+async function sendNotificationToPartner(
+    coupleSpaceId: string,
+    userId: string,
+    currentUser: { displayName: string | null; nickname: string },
+    content: string
+) {
+    try {
+        // 查找伴侣（需要已验证邮箱且开启了日记通知）
+        const partner = await prisma.user.findFirst({
+            where: {
+                coupleSpaceId,
+                id: { not: userId },
+                isEmailVerified: true,
+                email: { not: null },
+                notifyOnMoment: true  // 检查是否开启日记通知
+            }
+        })
+
+        if (partner?.email) {
+            await sendPartnerNotification(partner.email, {
+                type: 'new_moment',
+                partnerName: currentUser.displayName || currentUser.nickname,
+                recipientName: partner.displayName || partner.nickname,
+                content
+            })
+        }
+    } catch (e) {
+        console.error('Failed to send moment notification:', e)
     }
 }
