@@ -4,11 +4,13 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import GalleryCard from '@/components/GalleryCard'
 import UserAvatar from '@/components/UserAvatar'
+import AnimatedBackground from '@/components/AnimatedBackground'
 import confetti from 'canvas-confetti'
 
 interface UserData {
     id: string
     nickname: string
+    displayName?: string | null
     avatarEmoji: string
     avatarUrl?: string | null
     status: string
@@ -120,9 +122,15 @@ export default function GalleryPage() {
 
     const calculateDays = () => {
         if (!startDate) return 0
+        // Parse the start date and normalize to local midnight
         const start = new Date(startDate)
+        const startLocal = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+
+        // Get today at local midnight
         const today = new Date()
-        const diffTime = today.getTime() - start.getTime()
+        const todayLocal = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+
+        const diffTime = todayLocal.getTime() - startLocal.getTime()
         return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1
     }
 
@@ -176,7 +184,10 @@ export default function GalleryPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[var(--hf-bg-alt)]">
+        <div className="min-h-screen bg-[var(--hf-bg-alt)] relative">
+            {/* Animated Background */}
+            <AnimatedBackground />
+
             {/* Header */}
             <header className="sticky top-0 z-50 border-b border-[var(--hf-border)] bg-white">
                 <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">

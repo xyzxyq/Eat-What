@@ -218,8 +218,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as typeof activeTab)}
                             className={`flex-1 py-3 px-4 text-sm font-medium transition whitespace-nowrap ${activeTab === tab.id
-                                    ? 'text-[var(--hf-yellow)] border-b-2 border-[var(--hf-yellow)]'
-                                    : 'text-[var(--hf-text-muted)] hover:text-[var(--hf-text)]'
+                                ? 'text-[var(--hf-yellow)] border-b-2 border-[var(--hf-yellow)]'
+                                : 'text-[var(--hf-text-muted)] hover:text-[var(--hf-text)]'
                                 }`}
                         >
                             <span className="mr-1">{tab.icon}</span>
@@ -278,8 +278,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 key={theme.id}
                                                 onClick={() => handleThemeChange(theme.id)}
                                                 className={`flex flex-col items-center p-4 rounded-xl border-2 transition ${currentTheme === theme.id
-                                                        ? 'border-[var(--hf-yellow)] bg-[var(--hf-yellow-light)]'
-                                                        : 'border-[var(--hf-border)] hover:border-[var(--hf-yellow)]'
+                                                    ? 'border-[var(--hf-yellow)] bg-[var(--hf-yellow-light)]'
+                                                    : 'border-[var(--hf-border)] hover:border-[var(--hf-yellow)]'
                                                     }`}
                                             >
                                                 <span className="text-2xl">{theme.emoji}</span>
@@ -297,13 +297,46 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             {/* 账户信息 */}
                             {activeTab === 'account' && settings && (
                                 <div className="space-y-4">
-                                    <div className="p-4 bg-[var(--hf-bg)] rounded-xl space-y-3">
+                                    {/* 爱称 - 不可修改 */}
+                                    <div className="p-4 bg-[var(--hf-bg)] rounded-xl">
                                         <div className="flex justify-between items-center">
-                                            <span className="text-sm text-[var(--hf-text-muted)]">爱称</span>
-                                            <span className="text-sm font-medium text-[var(--hf-text)]">
-                                                {settings.displayName || settings.nickname}
+                                            <div>
+                                                <span className="text-sm text-[var(--hf-text-muted)]">爱称</span>
+                                                <p className="text-xs text-[var(--hf-text-muted)] opacity-70">登录时设置，不可修改</p>
+                                            </div>
+                                            <span className="text-sm font-medium text-[var(--hf-text)] bg-[var(--hf-yellow-light)] px-3 py-1 rounded-full">
+                                                {settings.nickname}
                                             </span>
                                         </div>
+                                    </div>
+
+                                    {/* 昵称 - 可修改 */}
+                                    <div className="p-4 bg-[var(--hf-bg)] rounded-xl space-y-2">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <span className="text-sm text-[var(--hf-text-muted)]">昵称</span>
+                                                <p className="text-xs text-[var(--hf-text-muted)] opacity-70">显示名称，可随时修改</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                defaultValue={settings.displayName || ''}
+                                                placeholder={settings.nickname}
+                                                className="hf-input text-sm flex-1"
+                                                onBlur={(e) => {
+                                                    const newName = e.target.value.trim()
+                                                    if (newName !== (settings.displayName || '')) {
+                                                        updateSettings({ displayName: newName || null })
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        <p className="text-xs text-[var(--hf-text-muted)]">留空则使用爱称显示</p>
+                                    </div>
+
+                                    {/* 邮箱 */}
+                                    <div className="p-4 bg-[var(--hf-bg)] rounded-xl">
                                         <div className="flex justify-between items-center">
                                             <span className="text-sm text-[var(--hf-text-muted)]">邮箱</span>
                                             <span className="text-sm font-medium text-[var(--hf-text)]">

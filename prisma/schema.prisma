@@ -7,14 +7,17 @@ datasource db {
 }
 
 model CoupleSpace {
-  id             String    @id @default(uuid())
-  passphraseHash String    @unique
+  id             String        @id @default(uuid())
+  passphraseHash String        @unique
   startDate      DateTime?
-  theme          String    @default("yellow")
-  createdAt      DateTime  @default(now())
+  theme          String        @default("yellow")
+  createdAt      DateTime      @default(now())
   users          User[]
   moments        Moment[]
   wishes         Wish[]
+  anniversaries  Anniversary[]
+  secretWishes   SecretWish[]
+  revealRequests WishRevealRequest[]
 }
 
 model User {
@@ -43,6 +46,9 @@ model User {
   wishVotes           WishVote[]
   wishComments        WishComment[]
   emailVerifications  EmailVerification[]
+  secretWishes        SecretWish[]
+  revealRequestsSent  WishRevealRequest[] @relation("RevealRequester")
+  revealRequestsReceived WishRevealRequest[] @relation("RevealTarget")
   
   @@unique([coupleSpaceId, nickname])
 }
@@ -64,6 +70,7 @@ model Moment {
   content       String
   mediaUrl      String?
   mediaType     String      @default("none")
+  likeCount     Int         @default(0)  // 点赞次数（可多次点击）
   userId        String
   coupleSpaceId String
   momentDate    DateTime
@@ -141,4 +148,50 @@ model WishComment {
   user      User          @relation(fields: [userId], references: [id])
   parent    WishComment?  @relation("WishCommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   WishComment[] @relation("WishCommentReplies")
+}
+
+// 期盼 - 重要日期/纪念日
+model Anniversary {
+  id            String      @id @default(uuid())
+  title         String      // 标题，如"在一起"、"生日"
+  date          DateTime    // 日期
+  emoji         String      @default("💕")  // 显示图标
+  type          String      @default("countdown")  // countdown(倒计时) 或 countup(已过天数)
+  isRecurring   Boolean     @default(false)  // 是否每年重复
+  isPinned      Boolean     @default(false)  // 是否置顶优先显示
+  sortOrder     Int         @default(0)  // 自定义排序顺序
+  coupleSpaceId String
+  createdById   String
+  createdAt     DateTime    @default(now())
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+}
+
+// 秘密心愿 - 个人私密心愿
+model SecretWish {
+  id            String    @id @default(uuid())
+  content       String    // 心愿内容
+  emoji         String    @default("🎁")
+  isRevealed    Boolean   @default(false)  // 是否已揭示给伴侣
+  revealedAt    DateTime? // 揭示时间
+  coupleSpaceId String
+  createdById   String
+  createdAt     DateTime  @default(now())
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  createdBy     User @relation(fields: [createdById], references: [id])
+  revealRequests WishRevealRequest[]
+}
+
+// 心愿揭示请求
+model WishRevealRequest {
+  id            String    @id @default(uuid())
+  secretWishId  String?   // null表示随机请求
+  requesterId   String    // 请求者
+  targetUserId  String    // 被请求者（心愿拥有者）
+  status        String    @default("pending") // pending/approved/rejected
+  coupleSpaceId String
+  createdAt     DateTime  @default(now())
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  secretWish    SecretWish? @relation(fields: [secretWishId], references: [id], onDelete: Cascade)
+  requester     User @relation("RevealRequester", fields: [requesterId], references: [id])
+  targetUser    User @relation("RevealTarget", fields: [targetUserId], references: [id])
 }

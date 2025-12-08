@@ -4,12 +4,12 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import MomentCard, { MomentData } from '@/components/MomentCard'
 import CreateMoment from '@/components/CreateMoment'
-import ThemeSelector from '@/components/ThemeSelector'
 import OnboardingModal from '@/components/OnboardingModal'
 import UserAvatar from '@/components/UserAvatar'
 import ProfilePopup from '@/components/ProfilePopup'
 import CoupleCard from '@/components/CoupleCard'
 import SettingsModal from '@/components/SettingsModal'
+import AnimatedBackground from '@/components/AnimatedBackground'
 
 interface UserData {
     id: string
@@ -122,6 +122,9 @@ export default function TimelinePage() {
                 onClose={() => setShowSettings(false)}
             />
 
+            {/* Animated Background */}
+            <AnimatedBackground />
+
             {/* Header */}
             <header className="sticky top-0 z-50 border-b border-[var(--hf-border)] bg-white">
                 <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -142,6 +145,14 @@ export default function TimelinePage() {
                         >
                             <span className="text-sm sm:text-base">✨</span>
                             <span className="text-xs sm:text-sm font-medium text-[var(--hf-text)]">心愿</span>
+                        </button>
+
+                        <button
+                            onClick={() => router.push('/anniversary')}
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 hover:shadow-md transition-all flex items-center gap-1"
+                        >
+                            <span className="text-sm sm:text-base">💝</span>
+                            <span className="text-xs sm:text-sm font-medium text-[var(--hf-text)]">期盼</span>
                         </button>
 
                         <button
@@ -216,6 +227,8 @@ export default function TimelinePage() {
                                     <MomentCard
                                         moment={moment}
                                         isCurrentUser={moment.user.id === currentUserId}
+                                        onUpdate={fetchMoments}
+                                        onDelete={() => setMoments(prev => prev.filter(m => m.id !== moment.id))}
                                     />
                                 </div>
                             ))}
@@ -228,7 +241,7 @@ export default function TimelinePage() {
             <footer className="border-t border-[var(--hf-border)] bg-white py-4 mt-8">
                 <div className="max-w-2xl mx-auto px-4">
                     <div className="flex items-center justify-between mb-3">
-                        <ThemeSelector />
+                        <span className="text-xs text-[var(--hf-text-muted)]">💕 我们的故事</span>
                         <a
                             href="https://github.com/xyzxyq/Eat-What"
                             target="_blank"

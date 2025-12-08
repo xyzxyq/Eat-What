@@ -1,11 +1,40 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import WishCard, { WishData } from '@/components/WishCard'
+import Link from 'next/link'
+import WishCard from '@/components/WishCard'
+import AnimatedBackground from '@/components/AnimatedBackground'
 import WishImportModal from '@/components/WishImportModal'
 
-interface UserInfo {
+interface WishData {
+    id: string
+    content: string
+    status: 'in_progress' | 'realized' | 'archived'
+    isCompleted: boolean
+    createdAt: string
+    updatedAt: string
+    votes: any[]
+    createdBy: {
+        id: string
+        nickname: string
+        displayName: string
+        avatarEmoji: string
+        avatarUrl?: string | null
+    }
+    lastEditedBy?: {
+        id: string
+        nickname: string
+        displayName: string
+        avatarEmoji: string
+        avatarUrl?: string | null
+    } | null
+    _count: {
+        comments: number
+    }
+}
+
+interface UserData {
     id: string
     nickname: string
     displayName?: string | null
@@ -13,54 +42,54 @@ interface UserInfo {
     avatarUrl?: string | null
 }
 
-type SortMode = 'votes' | 'time'
-type FilterMode = 'todo' | 'done' | 'all'
-
 export default function WishesPage() {
     const router = useRouter()
     const [wishes, setWishes] = useState<WishData[]>([])
-    const [users, setUsers] = useState<UserInfo[]>([])
+    const [users, setUsers] = useState<UserData[]>([])
     const [currentUserId, setCurrentUserId] = useState<string>('')
     const [loading, setLoading] = useState(true)
     const [newWishContent, setNewWishContent] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [sortMode, setSortMode] = useState<SortMode>('time')
-    const [filterMode, setFilterMode] = useState<FilterMode>('all')
+    const [filterMode, setFilterMode] = useState<'all' | 'todo' | 'done'>('all')
+    const [sortMode, setSortMode] = useState<'time' | 'votes'>('time')
     const [showImportModal, setShowImportModal] = useState(false)
-
-    const fetchWishes = useCallback(async () => {
-        try {
-            const res = await fetch('/api/wishes')
-            if (res.status === 401) {
-                router.push('/')
-                return
-            }
-            if (!res.ok) throw new Error('Failed to fetch')
-
-            const data = await res.json()
-            setWishes(data.wishes)
-            setUsers(data.users)
-            setCurrentUserId(data.currentUserId)
-        } catch (error) {
-            console.error('Error fetching wishes:', error)
-        } finally {
-            setLoading(false)
-        }
-    }, [router])
 
     useEffect(() => {
         fetchWishes()
-    }, [fetchWishes])
+    }, [])
+
+    const fetchWishes = async () => {
+        try {
+            // Fetch wishes (which also returns users)
+            const res = await fetch('/api/wishes')
+            const data = await res.json()
+
+            if (data.wishes) {
+                setWishes(data.wishes)
+                setUsers(data.users || [])
+                setCurrentUserId(data.currentUserId || '')
+            } else {
+                console.error('Invalid wishes data format:', data)
+                setWishes([])
+            }
+            setLoading(false)
+        } catch (error) {
+            console.error('Error fetching wishes:', error)
+            setLoading(false)
+        }
+    }
 
     const handleCreateWish = async () => {
         if (!newWishContent.trim() || isSubmitting) return
+
         setIsSubmitting(true)
         try {
             const res = await fetch('/api/wishes', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: newWishContent.trim() })
+                body: JSON.stringify({ content: newWishContent })
             })
+
             if (res.ok) {
                 setNewWishContent('')
                 fetchWishes()
@@ -80,10 +109,14 @@ export default function WishesPage() {
             return true
         })
         .sort((a, b) => {
+            // First: uncompleted items come before completed items
+            if (a.isCompleted !== b.isCompleted) {
+                return a.isCompleted ? 1 : -1
+            }
+            // Then sort by votes or time within each group
             if (sortMode === 'votes') {
-                // Sum all vote counts for each wish
-                const aTotalVotes = a.votes.reduce((sum, v) => sum + (v.count || 1), 0)
-                const bTotalVotes = b.votes.reduce((sum, v) => sum + (v.count || 1), 0)
+                const aTotalVotes = a.votes.reduce((sum: number, v: any) => sum + (v.count || 1), 0)
+                const bTotalVotes = b.votes.reduce((sum: number, v: any) => sum + (v.count || 1), 0)
                 return bTotalVotes - aTotalVotes
             }
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -104,7 +137,10 @@ export default function WishesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[var(--hf-bg-alt)]">
+        <div className="min-h-screen bg-[var(--hf-bg-alt)] relative">
+            {/* Animated Background */}
+            <AnimatedBackground />
+
             <style jsx>{`
                 .wishes-header {
                     position: sticky;
@@ -296,6 +332,30 @@ export default function WishesPage() {
                             </button>
                         </div>
                     </div>
+
+                    {/* Secret Wish Tree Banner */}
+                    <Link href="/wishes/secret-tree">
+                        <div className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white relative overflow-hidden group cursor-pointer shadow-lg transform transition hover:scale-[1.01]">
+                            <div className="absolute top-0 left-0 w-full h-full bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                            <div className="absolute -right-4 -bottom-4 text-8xl opacity-20 transform rotate-12 transition group-hover:rotate-0 group-hover:scale-110 duration-500">
+                                🌳
+                            </div>
+                            <div className="relative z-10 flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <span>🔮 秘密心愿树</span>
+                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">New</span>
+                                    </h3>
+                                    <p className="text-sm text-white/90 mt-1">
+                                        在这里种下你的小秘密，等待TA来发掘...
+                                    </p>
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                                    →
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
                 </div>
             </header>
 

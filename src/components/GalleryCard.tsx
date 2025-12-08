@@ -6,6 +6,7 @@ import UserAvatar from '@/components/UserAvatar'
 interface UserData {
     id: string
     nickname: string
+    displayName?: string | null
     avatarEmoji: string
     avatarUrl?: string | null
 }
@@ -104,6 +105,7 @@ export default function GalleryCard({ moment, currentUserId, onUpdate }: Gallery
     }
 
     const handleDeleteComment = async (commentId: string) => {
+        if (!confirm('确定删除这条评论吗？')) return
         await fetch(`/api/comments?id=${commentId}`, { method: 'DELETE' })
         fetchComments()
     }
@@ -267,29 +269,42 @@ export default function GalleryCard({ moment, currentUserId, onUpdate }: Gallery
                     </div>
 
                     {/* Comment Input */}
-                    <form onSubmit={handleComment} className="flex gap-2">
-                        <div className="flex-1">
-                            {replyTo && (
-                                <div className="text-xs text-[var(--hf-text-muted)] mb-1 flex items-center gap-2">
-                                    回复 @{replyTo.nickname}
-                                    <button type="button" onClick={() => setReplyTo(null)} className="hover:text-red-500">✕</button>
-                                </div>
-                            )}
+                    <form onSubmit={handleComment} className="space-y-2">
+                        {replyTo && (
+                            <div className="text-xs text-[var(--hf-text-muted)] flex items-center gap-2">
+                                回复 @{replyTo.nickname}
+                                <button type="button" onClick={() => setReplyTo(null)} className="hover:text-red-500">✕</button>
+                            </div>
+                        )}
+                        {/* Emoji Quick Pick */}
+                        <div className="flex flex-wrap gap-1">
+                            {['😊', '❤️', '👍', '🎉', '😂', '🥰', '💕', '✨', '🔥', '💪', '😭', '🤗'].map(emoji => (
+                                <button
+                                    key={emoji}
+                                    type="button"
+                                    onClick={() => setNewComment(prev => prev + emoji)}
+                                    className="w-7 h-7 text-base hover:bg-[var(--hf-bg-alt)] rounded transition"
+                                >
+                                    {emoji}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex gap-2">
                             <input
                                 type="text"
                                 value={newComment}
                                 onChange={e => setNewComment(e.target.value)}
                                 placeholder="写评论..."
-                                className="hf-input text-sm"
+                                className="hf-input text-sm flex-1"
                             />
+                            <button
+                                type="submit"
+                                disabled={loading || !newComment.trim()}
+                                className="hf-button text-sm px-3"
+                            >
+                                发送
+                            </button>
                         </div>
-                        <button
-                            type="submit"
-                            disabled={loading || !newComment.trim()}
-                            className="hf-button text-sm px-3"
-                        >
-                            发送
-                        </button>
                     </form>
                 </div>
             )}

@@ -125,6 +125,11 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 .avatar-container {
                     position: relative;
                     animation: float 3s ease-in-out infinite;
+                    width: 100px;
+                    min-width: 100px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
                 }
 
                 .avatar-container:nth-child(2) {
@@ -161,15 +166,16 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
 
                 .status-bubble {
                     background: white;
-                    padding: 4px 12px;
-                    border-radius: 12px;
-                    font-size: 12px;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                    padding: 6px 16px;
+                    border-radius: 16px;
+                    font-size: 14px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
                     animation: fadeInUp 0.5s ease-out;
-                    max-width: 100px;
+                    max-width: 140px;
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    border: 1px solid var(--hf-yellow-light);
                 }
 
                 @keyframes fadeInUp {
@@ -205,8 +211,47 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 .name-text {
                     font-weight: 600;
                     color: var(--hf-text);
-                    font-size: 14px;
-                    margin-top: 8px;
+                    font-size: 16px;
+                    margin-top: 10px;
+                }
+
+                .connection-line {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 80px;
+                    height: 2px;
+                    background: linear-gradient(90deg, var(--hf-yellow), var(--hf-yellow-light), var(--hf-yellow));
+                    z-index: 0;
+                }
+
+                .love-meter {
+                    position: absolute;
+                    bottom: 8px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    display: flex;
+                    gap: 4px;
+                    z-index: 5;
+                }
+
+                .love-dot {
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 50%;
+                    background: var(--hf-yellow);
+                    animation: lovePulse 1.5s ease-in-out infinite;
+                }
+
+                .love-dot:nth-child(2) { animation-delay: 0.2s; }
+                .love-dot:nth-child(3) { animation-delay: 0.4s; }
+                .love-dot:nth-child(4) { animation-delay: 0.6s; }
+                .love-dot:nth-child(5) { animation-delay: 0.8s; }
+
+                @keyframes lovePulse {
+                    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+                    50% { opacity: 1; transform: scale(1.2); }
                 }
 
                 .waiting-text {
@@ -302,6 +347,11 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                         border-radius: 16px;
                     }
 
+                    .avatar-container {
+                        width: 80px;
+                        min-width: 80px;
+                    }
+
                     .heart-connector {
                         font-size: 1.5rem;
                     }
@@ -311,9 +361,9 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                     }
 
                     .status-bubble {
-                        padding: 3px 8px;
-                        font-size: 10px;
-                        max-width: 70px;
+                        padding: 4px 10px;
+                        font-size: 11px;
+                        max-width: 75px;
                     }
 
                     .sparkle {
@@ -328,6 +378,11 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                     .orbit-emoji {
                         font-size: 10px;
                     }
+
+                    .love-dot {
+                        width: 6px;
+                        height: 6px;
+                    }
                 }
 
                 @media (max-width: 375px) {
@@ -335,8 +390,18 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                         padding: 10px;
                     }
 
+                    .avatar-container {
+                        width: 70px;
+                        min-width: 70px;
+                    }
+
                     .heart-connector {
                         font-size: 1.25rem;
+                    }
+
+                    .status-bubble {
+                        max-width: 65px;
+                        font-size: 10px;
                     }
 
                     .floating-emoji,
@@ -375,13 +440,13 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                                 <UserAvatar
                                     avatarUrl={currentUser.avatarUrl}
                                     avatarEmoji={currentUser.avatarEmoji}
-                                    size="xl"
+                                    size="2xl"
                                 />
                                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center text-xs">
                                     ✓
                                 </div>
                             </div>
-                            <span className="name-text">{currentUser.displayName || currentUser.nickname}</span>
+                            <span className="name-text">{currentUser.nickname}</span>
                         </button>
                         {currentUser.status && (
                             <div className="status-bubble mt-2 text-center">
@@ -409,13 +474,13 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                                 <UserAvatar
                                     avatarUrl={partner.avatarUrl}
                                     avatarEmoji={partner.avatarEmoji}
-                                    size="xl"
+                                    size="2xl"
                                 />
                                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center text-xs">
                                     ✓
                                 </div>
                             </div>
-                            <span className="name-text">{partner.displayName || partner.nickname}</span>
+                            <span className="name-text">{partner.nickname}</span>
                         </div>
                         {partner.status && (
                             <div className="status-bubble mt-2 text-center">
@@ -435,9 +500,22 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 )}
             </div>
 
+            {/* Love Meter */}
+            <div className="love-meter">
+                <div className="love-dot"></div>
+                <div className="love-dot"></div>
+                <div className="love-dot"></div>
+                <div className="love-dot"></div>
+                <div className="love-dot"></div>
+            </div>
+
             {/* Bottom decoration */}
-            <div className="text-center mt-4 text-xs text-[var(--hf-text-muted)] relative z-10">
-                ✨ 你们的专属空间 ✨
+            <div className="text-center mt-6 relative z-10">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/50 rounded-full border border-[var(--hf-yellow-light)]">
+                    <span className="text-lg">💝</span>
+                    <span className="text-sm font-medium text-[var(--hf-text)]">你们的专属空间</span>
+                    <span className="text-lg">💝</span>
+                </div>
             </div>
         </div>
     )

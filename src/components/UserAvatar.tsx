@@ -3,7 +3,7 @@
 interface UserAvatarProps {
     avatarUrl?: string | null
     avatarEmoji?: string
-    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+    size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'
     className?: string
 }
 
@@ -12,7 +12,8 @@ const sizeClasses = {
     sm: 'w-6 h-6 text-sm',
     md: 'w-8 h-8 text-base',
     lg: 'w-10 h-10 text-xl',
-    xl: 'w-12 h-12 text-2xl'
+    xl: 'w-12 h-12 text-2xl',
+    '2xl': 'w-16 h-16 text-3xl'
 }
 
 export default function UserAvatar({ avatarUrl, avatarEmoji = '💕', size = 'md', className = '' }: UserAvatarProps) {
