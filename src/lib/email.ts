@@ -1,6 +1,18 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// 懒加载 Resend 客户端，避免构建时因缺少 API key 而失败
+let resend: Resend | null = null
+
+function getResend(): Resend {
+    if (!resend) {
+        const apiKey = process.env.RESEND_API_KEY
+        if (!apiKey) {
+            throw new Error('RESEND_API_KEY 环境变量未设置')
+        }
+        resend = new Resend(apiKey)
+    }
+    return resend
+}
 
 const EMAIL_FROM = process.env.EMAIL_FROM || 'Eat_What <noreply@eat-what.fun>'
 
@@ -19,7 +31,7 @@ export async function sendVerificationEmail(
     code: string
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        const { error } = await resend.emails.send({
+        const { error } = await getResend().emails.send({
             from: EMAIL_FROM,
             to: [to],
             subject: '🔐 Eat_What 邮箱验证码',
@@ -137,7 +149,7 @@ export async function sendPartnerNotification(
         : wishTitle || ''
 
     try {
-        const { error } = await resend.emails.send({
+        const { error } = await getResend().emails.send({
             from: EMAIL_FROM,
             to: [to],
             subject,
