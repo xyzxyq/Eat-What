@@ -139,11 +139,11 @@ export async function POST(request: NextRequest) {
                 }),
                 prisma.user.findUnique({
                     where: { id: targetUserId },
-                    select: { email: true, nickname: true, displayName: true, notifyWish: true }
+                    select: { email: true, nickname: true, displayName: true, notifyOnWish: true }
                 })
             ])
 
-            if (targetUser?.email && targetUser.notifyWish !== false) {
+            if (targetUser?.email && targetUser.notifyOnWish !== false) {
                 const requesterName = requester?.displayName || requester?.nickname || '伴侣'
                 const recipientName = targetUser.displayName || targetUser.nickname || '你'
 
