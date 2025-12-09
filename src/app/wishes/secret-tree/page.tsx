@@ -47,19 +47,21 @@ export default function SecretTreePage() {
     const [newWishEmoji, setNewWishEmoji] = useState('🎁')
     const [receivedRequests, setReceivedRequests] = useState<RevealRequest[]>([])
     const [requestToRespond, setRequestToRespond] = useState<RevealRequest | null>(null)
+    const [newlyRevealedIds, setNewlyRevealedIds] = useState<Set<string>>(new Set())
 
     const { treeWishes, fallenStars } = useMemo(() => {
         const tree: SecretWish[] = []
         const fallen: SecretWish[] = []
         wishes.forEach(wish => {
-            if (wish.isRevealed && wish.createdById !== currentUserId) {
+            // All revealed wishes become fallen stars (visible to both users)
+            if (wish.isRevealed) {
                 fallen.push(wish)
             } else {
                 tree.push(wish)
             }
         })
         return { treeWishes: tree, fallenStars: fallen }
-    }, [wishes, currentUserId])
+    }, [wishes])
 
     useEffect(() => { fetchData() }, [])
 
@@ -142,9 +144,21 @@ export default function SecretTreePage() {
                 body: JSON.stringify({ requestId: requestToRespond.id, status })
             })
             if (res.ok) {
+                // Track newly revealed wish for falling animation
+                if (status === 'approved' && requestToRespond.secretWishId) {
+                    setNewlyRevealedIds(prev => new Set(prev).add(requestToRespond.secretWishId!))
+                    // Clear the animation flag after it plays
+                    setTimeout(() => {
+                        setNewlyRevealedIds(prev => {
+                            const next = new Set(prev)
+                            next.delete(requestToRespond.secretWishId!)
+                            return next
+                        })
+                    }, 2000)
+                }
                 setReceivedRequests(prev => prev.filter(r => r.id !== requestToRespond.id))
                 setRequestToRespond(null)
-                alert(status === 'approved' ? '已同意！对方现在可以看到这个心愿了。' : '已拒绝请求。')
+                alert(status === 'approved' ? '已同意！心愿化作星星升上了星空 ✨' : '已拒绝请求。')
                 if (receivedRequests.length > 1) setRequestToRespond(receivedRequests[1])
                 fetchData()
             }
@@ -244,6 +258,40 @@ export default function SecretTreePage() {
                 .wish-orb { animation: float 4s ease-in-out infinite; }
                 .wish-orb:nth-child(even) { animation-delay: -2s; }
                 .fallen-star { animation: starPulse 2s ease-in-out infinite; cursor: pointer; }
+                @keyframes wishFalling {
+                    0% { 
+                        transform: translateY(200px) scale(0.5); 
+                        opacity: 0;
+                        filter: drop-shadow(0 0 0px gold);
+                    }
+                    30% { 
+                        transform: translateY(100px) scale(0.8); 
+                        opacity: 1;
+                    }
+                    60% { 
+                        transform: translateY(-10px) scale(1.2); 
+                        filter: drop-shadow(0 0 30px gold);
+                    }
+                    80% { 
+                        transform: translateY(5px) scale(1); 
+                    }
+                    100% { 
+                        transform: translateY(0) scale(1); 
+                        opacity: 1;
+                        filter: drop-shadow(0 0 8px gold);
+                    }
+                }
+                .star-falling {
+                    animation: wishFalling 1.5s ease-out forwards, starPulse 2s ease-in-out infinite 1.5s;
+                }
+                .sky-star {
+                    position: absolute;
+                    cursor: pointer;
+                    transition: transform 0.3s ease;
+                }
+                .sky-star:hover {
+                    transform: scale(1.3);
+                }
                 .shooting-star {
                     position: absolute;
                     width: 4px;
@@ -336,9 +384,9 @@ export default function SecretTreePage() {
             </header>
             {/* Hint Text - Below Header */}
             {treeWishes.length > 0 && (
-                <div className="fixed top-14 md:top-20 left-0 right-0 z-40 flex justify-center py-1.5 md:py-2 pointer-events-none px-4">
-                    <div className="px-3 py-1.5 md:px-5 md:py-2 bg-gradient-to-r from-amber-500/25 via-yellow-400/25 to-amber-500/25 backdrop-blur-sm rounded-full border border-amber-400/40 shadow-lg shadow-amber-500/10">
-                        <p className="text-amber-100 text-xs md:text-base lg:text-lg font-semibold tracking-wide text-center">
+                <div className="fixed top-12 md:top-16 left-0 right-0 z-40 flex justify-center py-1 md:py-2 pointer-events-none px-2 md:px-4">
+                    <div className="px-2.5 py-1 md:px-4 md:py-1.5 bg-gradient-to-r from-amber-500/25 via-yellow-400/25 to-amber-500/25 backdrop-blur-sm rounded-full border border-amber-400/40 shadow-lg shadow-amber-500/10">
+                        <p className="text-amber-100 text-[10px] md:text-sm lg:text-base font-semibold tracking-wide text-center whitespace-nowrap">
                             ✨ 点击心愿球查看详情 ✨
                         </p>
                     </div>
@@ -346,7 +394,7 @@ export default function SecretTreePage() {
             )}
 
             {/* Main Content */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-end pt-20 md:pt-28">
+            <div className="relative z-10 flex-1 flex flex-col items-center justify-end pt-16 md:pt-24">
                 {/* Tree with Grass */}
                 <div className="tree-container relative">
                     {/* Grass - at the base of the tree */}
@@ -507,17 +555,42 @@ export default function SecretTreePage() {
 
             </div>
 
-            {/* Fallen Stars */}
+            {/* Revealed Wishes - Scattered Stars in the Sky */}
             {fallenStars.length > 0 && (
-                <div className="fixed bottom-16 left-0 right-0 z-30">
-                    <div className="bg-gradient-to-t from-indigo-950/90 to-transparent pt-8 pb-4 px-6">
-                        <p className="text-center text-amber-200/60 text-xs mb-3 tracking-widest uppercase">⭐ 已揭示的心愿 ⭐</p>
-                        <div className="flex justify-center gap-5 flex-wrap">
-                            {fallenStars.map((wish, i) => (
-                                <button key={wish.id} onClick={() => setSelectedWish(wish)} className="fallen-star text-3xl md:text-4xl hover:scale-125 transition-transform" style={{ animationDelay: `${i * 0.2}s` }} title="点击查看">⭐</button>
-                            ))}
-                        </div>
-                    </div>
+                <div className="fixed inset-0 z-[15] pointer-events-none overflow-hidden">
+                    {fallenStars.map((wish, i) => {
+                        const isNewlyRevealed = newlyRevealedIds.has(wish.id)
+                        // Deterministic positions based on index to avoid hydration mismatch
+                        const positions = [
+                            { top: '8%', left: '12%' },
+                            { top: '15%', left: '75%' },
+                            { top: '5%', left: '45%' },
+                            { top: '20%', left: '25%' },
+                            { top: '12%', left: '88%' },
+                            { top: '25%', left: '60%' },
+                            { top: '18%', left: '5%' },
+                            { top: '10%', left: '35%' },
+                            { top: '22%', left: '92%' },
+                            { top: '6%', left: '68%' },
+                        ]
+                        const pos = positions[i % positions.length]
+                        return (
+                            <button
+                                key={wish.id}
+                                onClick={() => setSelectedWish(wish)}
+                                className={`absolute pointer-events-auto text-2xl md:text-4xl hover:scale-150 transition-all duration-300 ${isNewlyRevealed ? 'star-falling' : 'fallen-star'}`}
+                                style={{
+                                    top: pos.top,
+                                    left: pos.left,
+                                    animationDelay: isNewlyRevealed ? '0s' : `${i * 0.3}s`,
+                                    filter: 'drop-shadow(0 0 10px gold) drop-shadow(0 0 20px rgba(255,215,0,0.5))'
+                                }}
+                                title="点击查看已揭示的心愿"
+                            >
+                                ⭐
+                            </button>
+                        )
+                    })}
                 </div>
             )}
 

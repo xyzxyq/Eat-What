@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/auth'
+import { sendPartnerNotification } from '@/lib/email'
 
 export async function GET(request: NextRequest) {
     try {
@@ -128,6 +129,34 @@ export async function POST(request: NextRequest) {
                 status: 'pending'
             }
         })
+
+        // 4. Send email notification to target user
+        try {
+            const [requester, targetUser] = await Promise.all([
+                prisma.user.findUnique({
+                    where: { id: session.userId },
+                    select: { nickname: true, displayName: true }
+                }),
+                prisma.user.findUnique({
+                    where: { id: targetUserId },
+                    select: { email: true, nickname: true, displayName: true, notifyWish: true }
+                })
+            ])
+
+            if (targetUser?.email && targetUser.notifyWish !== false) {
+                const requesterName = requester?.displayName || requester?.nickname || '伴侣'
+                const recipientName = targetUser.displayName || targetUser.nickname || '你'
+
+                await sendPartnerNotification(targetUser.email, {
+                    type: 'wish_reveal_request',
+                    partnerName: requesterName,
+                    recipientName: recipientName
+                })
+            }
+        } catch (emailError) {
+            console.error('Failed to send wish reveal notification:', emailError)
+            // Don't fail the request just because email failed
+        }
 
         return NextResponse.json(newRequest)
     } catch (error) {

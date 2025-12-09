@@ -102,7 +102,7 @@ export async function sendVerificationEmail(
 /**
  * 通知类型
  */
-export type NotificationType = 'new_moment' | 'new_comment' | 'wish_update'
+export type NotificationType = 'new_moment' | 'new_comment' | 'wish_update' | 'wish_reveal_request'
 
 interface NotificationData {
     type: NotificationType
@@ -141,6 +141,11 @@ export async function sendPartnerNotification(
             emoji = '✨'
             subject = `💕 ${partnerName} 更新了心愿清单`
             mainMessage = `<strong>${partnerName}</strong> 在「我们想做的事」中添加了新心愿：`
+            break
+        case 'wish_reveal_request':
+            emoji = '🔮'
+            subject = `💕 ${partnerName} 想查看你的秘密心愿`
+            mainMessage = `<strong>${partnerName}</strong> 正在请求查看你秘密心愿树上的一个心愿，快去决定是否同意吧~`
             break
     }
 
