@@ -10,6 +10,8 @@ import ProfilePopup from '@/components/ProfilePopup'
 import CoupleCard from '@/components/CoupleCard'
 import SettingsModal from '@/components/SettingsModal'
 import AnimatedBackground from '@/components/AnimatedBackground'
+import DailyInteractionPanel from '@/components/DailyInteractionPanel'
+import SwipeablePanel from '@/components/SwipeablePanel'
 
 interface UserData {
     id: string
@@ -192,11 +194,18 @@ export default function TimelinePage() {
                     />
                 </div>
 
-                {/* Create Moment Section */}
+                {/* Swipeable Panel: CreateMoment <-> DailyInteraction */}
                 <div className="mb-8">
-                    <CreateMoment
-                        onSuccess={fetchMoments}
-                        disabled={hasPostedToday}
+                    <SwipeablePanel
+                        leftPanel={
+                            <CreateMoment
+                                onSuccess={fetchMoments}
+                                disabled={hasPostedToday}
+                            />
+                        }
+                        rightPanel={
+                            <DailyInteractionPanel hasPartner={!!partner} />
+                        }
                     />
                 </div>
 

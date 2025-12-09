@@ -16,10 +16,36 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/Prisma-7-2D3748?style=flat-square&logo=prisma" alt="Prisma" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="License" />
+  <a href="https://nextjs.org/" target="_blank">
+    <img src="https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js" alt="Next.js" />
+  </a>
+  <a href="https://www.prisma.io/" target="_blank">
+    <img src="https://img.shields.io/badge/Prisma-7-2D3748?style=flat-square&logo=prisma" alt="Prisma" />
+  </a>
+  <a href="https://www.typescriptlang.org/" target="_blank">
+    <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
+  </a>
+  <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">
+    <img src="https://img.shields.io/badge/License-CC%20BY--NC%204.0-lightgrey?style=flat-square&logo=creativecommons" alt="License" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/xyzxyq/Eat-What/stargazers">
+    <img src="https://img.shields.io/github/stars/xyzxyq/Eat-What?style=flat-square&logo=github" alt="GitHub Stars" />
+  </a>
+  <a href="https://github.com/xyzxyq/Eat-What/network/members">
+    <img src="https://img.shields.io/github/forks/xyzxyq/Eat-What?style=flat-square&logo=github" alt="GitHub Forks" />
+  </a>
+  <a href="https://github.com/xyzxyq/Eat-What/issues">
+    <img src="https://img.shields.io/github/issues/xyzxyq/Eat-What?style=flat-square&logo=github" alt="GitHub Issues" />
+  </a>
+  <a href="https://github.com/xyzxyq/Eat-What/commits">
+    <img src="https://img.shields.io/github/last-commit/xyzxyq/Eat-What?style=flat-square&logo=github" alt="Last Commit" />
+  </a>
+  <a href="https://eat-what.fun">
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Feat-what.fun&style=flat-square&logo=vercel" alt="Website" />
+  </a>
 </p>
 
 ---
@@ -88,6 +114,16 @@
 - ✨ 主题色浮动 Emoji 装饰
 - 🌟 轨道绕行光效
 - 📱 完美适配手机端
+
+### 💋 每日亲亲
+- 💕 每天一次虚拟亲亲互动
+- 💥 双方都点击后触发爱心爆炸特效
+- 🔄 每日 0 点自动重置
+
+### 🌙 晚安打卡
+- 🌟 晚间时段（20:00-06:00）说晚安
+- 💫 查看对方是否已说晚安
+- ✨ 双方都打卡后显示「晚安，好梦」
 
 ### 👤 个性化资料
 - 🎀 首次登录引导设置性别、爱称、头像
@@ -241,14 +277,49 @@ src/
 
 ---
 
-## 📄 开源协议
+## 📄 许可证
 
-本项目采用 [MIT License](LICENSE) 开源协议。
+本项目采用 [CC BY-NC 4.0](LICENSE) 许可证。
+
+<a href="https://creativecommons.org/licenses/by-nc/4.0/">
+  <img src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" alt="CC BY-NC 4.0" />
+</a>
+
+**这意味着：**
+- ✅ 您可以自由分享和修改本项目
+- 📝 **必须署名** - 请标注原作者并提供指向本仓库的链接
+- 🚫 **禁止商用** - 不得将本项目用于商业目的
+
+---
+
+## 👥 贡献者
+
+感谢所有为这个项目做出贡献的人！
+
+<a href="https://github.com/xyzxyq/Eat-What/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=xyzxyq/Eat-What" alt="Contributors" />
+</a>
+
+---
+
+## 📈 Star History
+
+<a href="https://star-history.com/#xyzxyq/Eat-What&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=xyzxyq/Eat-What&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=xyzxyq/Eat-What&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=xyzxyq/Eat-What&type=Date" width="600" />
+  </picture>
+</a>
 
 ---
 
 <p align="center">
-  Made with 💛 for couples
+  <strong>Made with 💛 for couples</strong>
   <br />
-  <sub>© 2024 Eat_What</sub>
+  <sub>© 2024 Eat_What • <a href="https://github.com/xyzxyq/Eat-What">GitHub</a> • <a href="https://eat-what.fun">Website</a></sub>
+</p>
+
+<p align="center">
+  如果这个项目对你有帮助，请给一个 ⭐ Star 支持一下！
 </p>

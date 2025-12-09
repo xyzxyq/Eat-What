@@ -19,6 +19,8 @@ model CoupleSpace {
   anniversaries  Anniversary[]
   secretWishes   SecretWish[]
   revealRequests WishRevealRequest[]
+  dailyInteractions DailyInteraction[]
+  missYouRecords    MissYou[]
 }
 
 model User {
@@ -52,6 +54,8 @@ model User {
   secretWishes        SecretWish[]
   revealRequestsSent  WishRevealRequest[] @relation("RevealRequester")
   revealRequestsReceived WishRevealRequest[] @relation("RevealTarget")
+  dailyInteractions   DailyInteraction[]
+  missYouRecords       MissYou[]
   
   @@unique([coupleSpaceId, nickname])
 }
@@ -197,4 +201,37 @@ model WishRevealRequest {
   secretWish    SecretWish? @relation(fields: [secretWishId], references: [id], onDelete: Cascade)
   requester     User @relation("RevealRequester", fields: [requesterId], references: [id])
   targetUser    User @relation("RevealTarget", fields: [targetUserId], references: [id])
+}
+
+// 每日互动（亲亲/晚安打卡）
+model DailyInteraction {
+  id            String      @id @default(uuid())
+  type          String      // "kiss" 或 "goodnight"
+  date          String      // 日期字符串 YYYY-MM-DD
+  userId        String
+  coupleSpaceId String
+  createdAt     DateTime    @default(now())
+  
+  user          User        @relation(fields: [userId], references: [id])
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  
+  @@unique([type, date, userId])  // 每人每天每类型只能一次
+  @@index([coupleSpaceId, type, date])
+}
+
+// 想你记录（每日点击伴侣头像累计）
+model MissYou {
+  id            String      @id @default(uuid())
+  date          String      // 日期字符串 YYYY-MM-DD
+  count         Int         @default(1)  // 想你次数
+  userId        String      // 发起者（点击的人）
+  coupleSpaceId String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  user          User        @relation(fields: [userId], references: [id])
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  
+  @@unique([date, userId])  // 每人每天只有一条记录
+  @@index([coupleSpaceId, date])
 }

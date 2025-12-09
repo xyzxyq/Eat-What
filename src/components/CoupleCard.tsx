@@ -59,6 +59,12 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
     const [currentTheme, setCurrentTheme] = useState(theme)
     const [showInvite, setShowInvite] = useState(false)
 
+    // 想你功能状态
+    const [myMissCount, setMyMissCount] = useState(0)
+    const [partnerMissData, setPartnerMissData] = useState<{ count: number; fromName: string } | null>(null)
+    const [showMissToast, setShowMissToast] = useState(false)
+    const [toastMessage, setToastMessage] = useState('')
+
     // Listen for theme changes from document
     useEffect(() => {
         const checkTheme = () => {
@@ -73,6 +79,41 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
 
         return () => observer.disconnect()
     }, [])
+
+    // 获取想你数据
+    useEffect(() => {
+        if (partner) {
+            fetchMissYouData()
+        }
+    }, [partner])
+
+    const fetchMissYouData = async () => {
+        try {
+            const res = await fetch('/api/miss-you')
+            if (res.ok) {
+                const data = await res.json()
+                setMyMissCount(data.myCount)
+                setPartnerMissData(data.partnerMissYou)
+            }
+        } catch (e) {
+            console.error('Failed to fetch miss-you data:', e)
+        }
+    }
+
+    const handleMissYou = async () => {
+        try {
+            const res = await fetch('/api/miss-you', { method: 'POST' })
+            const data = await res.json()
+            if (res.ok) {
+                setMyMissCount(data.count)
+                setToastMessage(data.message)
+                setShowMissToast(true)
+                setTimeout(() => setShowMissToast(false), 1500)
+            }
+        } catch (e) {
+            console.error('Miss-you failed:', e)
+        }
+    }
 
     const themeConfig = themeEmojis[currentTheme] || themeEmojis.yellow
 
@@ -178,6 +219,69 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                     overflow: hidden;
                     text-overflow: ellipsis;
                     border: 1px solid var(--hf-yellow-light);
+                }
+
+                .miss-you-bubble {
+                    position: absolute;
+                    left: -10px;
+                    top: 50%;
+                    transform: translateX(-100%) translateY(-50%);
+                    background: linear-gradient(135deg, #fce7f3 0%, #fdf2f8 100%);
+                    padding: 6px 10px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    box-shadow: 0 4px 12px rgba(236,72,153,0.15);
+                    animation: missYouPop 0.5s ease-out;
+                    border: 1px solid #f9a8d4;
+                    color: #be185d;
+                    font-weight: 500;
+                    white-space: nowrap;
+                    z-index: 10;
+                }
+
+                .miss-you-bubble-right {
+                    position: absolute;
+                    right: -10px;
+                    top: 50%;
+                    transform: translateX(100%) translateY(-50%);
+                    background: linear-gradient(135deg, #fce7f3 0%, #fdf2f8 100%);
+                    padding: 6px 10px;
+                    border-radius: 12px;
+                    font-size: 11px;
+                    box-shadow: 0 4px 12px rgba(236,72,153,0.15);
+                    animation: missYouPop 0.5s ease-out;
+                    border: 1px solid #f9a8d4;
+                    color: #be185d;
+                    font-weight: 500;
+                    white-space: nowrap;
+                    z-index: 10;
+                }
+
+                @keyframes missYouPop {
+                    0% { opacity: 0; transform: scale(0.8) translateY(10px); }
+                    60% { transform: scale(1.05) translateY(-2px); }
+                    100% { opacity: 1; transform: scale(1) translateY(0); }
+                }
+
+                .miss-toast {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%);
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 24px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    box-shadow: 0 8px 32px rgba(236,72,153,0.4);
+                    z-index: 1000;
+                    animation: toastPop 0.3s ease-out;
+                }
+
+                @keyframes toastPop {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+                    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
                 }
 
                 @keyframes fadeInUp {
@@ -447,6 +551,12 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center text-xs">
                                     ✓
                                 </div>
+                                {/* 我想伴侣的次数 - 显示在头像左侧 */}
+                                {myMissCount > 0 && (
+                                    <div className="miss-you-bubble">
+                                        <span>❤️ 想TA {myMissCount} 次</span>
+                                    </div>
+                                )}
                             </div>
                             <span className="name-text">{currentUser.nickname}</span>
                         </button>
@@ -471,7 +581,11 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 {/* Partner */}
                 {partner ? (
                     <div className="avatar-container">
-                        <div className="avatar-wrapper flex flex-col items-center">
+                        <button
+                            onClick={handleMissYou}
+                            className="avatar-wrapper flex flex-col items-center cursor-pointer"
+                            title="点击表达想念"
+                        >
                             <div className="relative">
                                 <UserAvatar
                                     avatarUrl={partner.avatarUrl}
@@ -481,9 +595,15 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center text-xs">
                                     ✓
                                 </div>
+                                {/* 伴侣想我的次数 - 显示在头像右侧 */}
+                                {partnerMissData && partnerMissData.count > 0 && (
+                                    <div className="miss-you-bubble-right">
+                                        <span>💗 想你 {partnerMissData.count} 次</span>
+                                    </div>
+                                )}
                             </div>
                             <span className="name-text">{partner.nickname}</span>
-                        </div>
+                        </button>
                         {partner.status && (
                             <div className="status-bubble mt-2 text-center">
                                 {partner.status}
@@ -525,6 +645,13 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                     <span className="text-lg">💝</span>
                 </div>
             </div>
+
+            {/* Miss You Toast */}
+            {showMissToast && (
+                <div className="miss-toast">
+                    {toastMessage}
+                </div>
+            )}
 
             {/* Invite Partner Modal */}
             {showInvite && (

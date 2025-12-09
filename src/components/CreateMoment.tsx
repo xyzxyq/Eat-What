@@ -90,7 +90,7 @@ export default function CreateMoment({ onSuccess, disabled }: CreateMomentProps)
 
     if (disabled) {
         return (
-            <div className="hf-card bg-[var(--hf-bg-alt)] text-center">
+            <div className="hf-card bg-[var(--hf-bg-alt)] text-center min-h-[280px] flex flex-col items-center justify-center">
                 <div className="text-4xl mb-3">✅</div>
                 <p className="font-semibold text-[var(--hf-text)]">今日已提交</p>
                 <p className="text-sm text-[var(--hf-text-muted)] mt-1">
