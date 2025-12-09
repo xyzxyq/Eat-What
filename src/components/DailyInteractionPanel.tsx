@@ -195,7 +195,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                             <button
                                 onClick={handleKiss}
                                 disabled={kissStatus.currentUserDone || kissing}
-                                className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all ${kissStatus.bothDone
+                                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${kissStatus.bothDone
                                     ? 'bg-gradient-to-br from-pink-200 to-red-200 border-2 border-pink-400'
                                     : kissStatus.currentUserDone
                                         ? 'bg-pink-100 border border-pink-300'
@@ -228,7 +228,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                             <button
                                 onClick={handleHug}
                                 disabled={hugStatus.currentUserDone || hugging}
-                                className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all ${hugStatus.bothDone
+                                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${hugStatus.bothDone
                                     ? 'bg-gradient-to-br from-amber-200 to-orange-200 border-2 border-amber-400'
                                     : hugStatus.currentUserDone
                                         ? 'bg-amber-100 border border-amber-300'
@@ -261,7 +261,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                             <button
                                 onClick={handleGoodnight}
                                 disabled={goodnightStatus.currentUserDone || saying || !isGoodnightTime}
-                                className={`w-14 h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all ${goodnightStatus.bothDone
+                                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${goodnightStatus.bothDone
                                     ? 'bg-gradient-to-br from-indigo-200 to-purple-200 border-2 border-indigo-400'
                                     : goodnightStatus.currentUserDone
                                         ? 'bg-indigo-100 border border-indigo-300'
@@ -326,7 +326,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
             {/* 放大弹窗 - 使用 Portal 渲染到 body */}
             {showZoom && typeof document !== 'undefined' && createPortal(
                 <div
-                    className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
+                    className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-2 sm:p-4"
                     onClick={() => setShowZoom(false)}
                 >
                     <div
@@ -419,11 +419,11 @@ function CompactMonthGrid({ checkedDates, color }: { checkedDates: string[], col
     const bgColor = color === 'pink' ? 'bg-pink-500' : color === 'amber' ? 'bg-amber-500' : 'bg-indigo-500'
 
     return (
-        <div className="grid grid-cols-7 gap-[3px]">
+        <div className="grid grid-cols-7 gap-1 sm:gap-[3px]">
             {days.map((day, i) => (
                 <div
                     key={i}
-                    className={`w-[18px] h-[18px] rounded-sm ${day === null
+                    className={`w-5 h-5 sm:w-[18px] sm:h-[18px] rounded-sm ${day === null
                         ? ''
                         : isChecked(day)
                             ? `${bgColor} shadow-sm`

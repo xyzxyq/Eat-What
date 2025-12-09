@@ -128,10 +128,10 @@ export default function TimelinePage() {
             <AnimatedBackground />
 
             {/* Header */}
-            <header className="sticky top-0 z-50 border-b border-[var(--hf-border)] bg-white">
-                <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <img src="/eat_what_logo.png" alt="Eat What" className="w-8 h-8 rounded-lg" />
+            <header className="sticky top-0 z-50 border-b border-[var(--hf-border)] bg-white safe-area-top">
+                <div className="max-w-2xl mx-auto px-2 sm:px-4 py-2 sm:py-3 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        <img src="/eat_what_logo.png" alt="Eat What" className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg" />
                         <div>
                             <h1 className="font-bold text-[var(--hf-text)] logo-font text-sm sm:text-base">Eat_What</h1>
                             <p className="text-xs text-[var(--hf-text-muted)] hidden sm:block">
@@ -140,10 +140,10 @@ export default function TimelinePage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 sm:gap-2">
+                    <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
                         <button
                             onClick={() => router.push('/wishes')}
-                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-[var(--hf-yellow-light)] to-white border border-[var(--hf-yellow)] hover:shadow-md transition-all flex items-center gap-1"
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-[var(--hf-yellow-light)] to-white border border-[var(--hf-yellow)] hover:shadow-md transition-all flex items-center gap-1 flex-shrink-0 touch-feedback"
                         >
                             <span className="text-sm sm:text-base">✨</span>
                             <span className="text-xs sm:text-sm font-medium text-[var(--hf-text)]">心愿</span>
@@ -151,7 +151,7 @@ export default function TimelinePage() {
 
                         <button
                             onClick={() => router.push('/anniversary')}
-                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 hover:shadow-md transition-all flex items-center gap-1"
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 hover:shadow-md transition-all flex items-center gap-1 flex-shrink-0 touch-feedback"
                         >
                             <span className="text-sm sm:text-base">💝</span>
                             <span className="text-xs sm:text-sm font-medium text-[var(--hf-text)]">期盼</span>
@@ -159,7 +159,7 @@ export default function TimelinePage() {
 
                         <button
                             onClick={() => router.push('/gallery')}
-                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-pink-50 to-white border border-pink-200 hover:shadow-md transition-all flex items-center gap-1"
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-pink-50 to-white border border-pink-200 hover:shadow-md transition-all flex items-center gap-1 flex-shrink-0 touch-feedback"
                         >
                             <span className="text-sm sm:text-base">💕</span>
                             <span className="text-xs sm:text-sm font-medium text-[var(--hf-text)]">日记</span>
@@ -167,7 +167,7 @@ export default function TimelinePage() {
 
                         <button
                             onClick={() => setShowSettings(true)}
-                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-xs sm:text-sm text-[var(--hf-text-muted)] flex items-center gap-1"
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-xs sm:text-sm text-[var(--hf-text-muted)] flex items-center gap-1 flex-shrink-0 touch-feedback"
                         >
                             <span>⚙️</span>
                             <span className="hidden sm:inline">设置</span>

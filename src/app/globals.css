@@ -261,6 +261,93 @@ body {
    Mobile Responsive Styles
    ================================ */
 
+/* Touch target utility - minimum 44x44px for accessibility */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Touch feedback for interactive elements */
+.touch-feedback {
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.touch-feedback:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+/* Smooth scrolling container */
+.scroll-smooth {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile modal styles */
+.mobile-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.mobile-modal-content {
+  background: white;
+  border-radius: 1rem;
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  width: 100%;
+  max-width: 28rem;
+}
+
+/* Full screen modal for small screens */
+@media (max-width: 480px) {
+  .mobile-modal-content {
+    max-width: 100%;
+    max-height: calc(100vh - 1rem);
+    max-height: calc(100dvh - 1rem);
+    border-radius: 1rem 1rem 0 0;
+    margin-top: auto;
+  }
+  
+  .mobile-modal-fullscreen .mobile-modal-content {
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+/* Horizontal scroll container for nav buttons */
+.mobile-scroll-x {
+  display: flex;
+  overflow-x: auto;
+  gap: 0.5rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mobile-scroll-x::-webkit-scrollbar {
+  display: none;
+}
+
 /* Small phones */
 @media (max-width: 480px) {
 
@@ -272,24 +359,26 @@ body {
   /* Cards - less padding on mobile */
   .hf-card {
     padding: 1rem;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
   }
 
-  /* Buttons - smaller on mobile */
+  /* Buttons - smaller on mobile but still touchable */
   .hf-button {
     padding: 0.625rem 1rem;
     font-size: 0.875rem;
+    min-height: 44px;
   }
 
   /* Input fields */
   .hf-input {
-    padding: 0.625rem 0.75rem;
-    font-size: 0.875rem;
+    padding: 0.75rem;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+    min-height: 44px;
   }
 
   /* Badge - smaller */
   .hf-badge {
-    padding: 0.125rem 0.5rem;
+    padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
   }
 
@@ -303,6 +392,11 @@ body {
   /* Hide long text on mobile */
   .mobile-hide {
     display: none !important;
+  }
+  
+  /* Show mobile-only elements */
+  .mobile-show {
+    display: block !important;
   }
 }
 
@@ -329,6 +423,15 @@ body {
     width: 100%;
     justify-content: center;
   }
+  
+  /* Responsive grid for mobile */
+  .mobile-grid-1 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .mobile-grid-2 {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 }
 
 /* Touch-friendly improvements */
@@ -342,6 +445,12 @@ body {
   .hf-input {
     min-height: 44px;
   }
+  
+  /* Better active states for touch */
+  .hf-button:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
 
   /* Remove hover effects on touch devices */
   .hf-card:hover {
@@ -353,9 +462,16 @@ body {
     transform: none;
     box-shadow: none;
   }
+  
+  /* Larger checkboxes and radios for touch */
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
 }
 
-/* Safe area for notched phones */
+/* Safe area for notched phones (iPhone X+, etc.) */
 @supports (padding: env(safe-area-inset-bottom)) {
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
@@ -364,13 +480,24 @@ body {
   .safe-area-top {
     padding-top: env(safe-area-inset-top);
   }
+  
+  .safe-area-all {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
 }
 
 /* Extra small phones (320px-375px) */
 @media (max-width: 375px) {
+  html {
+    font-size: 13px;
+  }
+  
   .hf-card {
     padding: 0.75rem;
-    border-radius: 12px;
+    border-radius: 0.75rem;
   }
 
   .hf-button {
@@ -380,20 +507,20 @@ body {
 
   /* Couple card adjustments for tiny screens */
   .couple-card {
-    padding: 12px !important;
-    border-radius: 16px !important;
+    padding: 10px !important;
+    border-radius: 14px !important;
   }
 
   /* Smaller navigation items */
   header button {
-    font-size: 0.75rem;
-    padding: 0.25rem;
+    font-size: 0.7rem;
+    padding: 0.375rem 0.5rem;
   }
 
   /* Timeline content */
   main {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 }
 
@@ -406,6 +533,11 @@ body {
   header {
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
+  }
+  
+  /* Reduce heights in landscape */
+  .hf-card {
+    padding: 0.75rem;
   }
 }
 
@@ -421,8 +553,9 @@ body {
   /* Better card sizing on mobile */
   .hf-card img,
   .hf-card video {
-    max-height: 300px;
+    max-height: 250px;
     object-fit: cover;
+    border-radius: 0.5rem;
   }
 
   /* Ensure footer is readable */
@@ -432,5 +565,37 @@ body {
 
   footer p {
     font-size: 0.7rem;
+  }
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Improve text readability on mobile */
+@media (max-width: 480px) {
+  body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  /* Better line height for mobile reading */
+  p, .text-mobile-readable {
+    line-height: 1.6;
+  }
+}
+
+/* Animation for mobile - reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

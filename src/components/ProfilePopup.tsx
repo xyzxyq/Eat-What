@@ -128,13 +128,20 @@ export default function ProfilePopup({ user, onClose, onUpdate }: ProfilePopupPr
     }
 
     return (
-        <div className="fixed inset-0 bg-black/30 z-50 flex items-start justify-center pt-20">
+        <div className="fixed inset-0 bg-black/30 z-50 flex items-end sm:items-start justify-center sm:pt-20 safe-area-bottom">
             <div
                 ref={popupRef}
-                className="bg-white rounded-2xl shadow-2xl w-[340px] max-h-[70vh] overflow-hidden animate-fade-in-up"
+                className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:w-[340px] max-h-[85vh] sm:max-h-[70vh] overflow-hidden animate-fade-in-up"
             >
                 {/* Header */}
                 <div className="bg-gradient-to-r from-[var(--hf-yellow-light)] to-white p-4 text-center">
+                    {/* 移动端关闭按钮 */}
+                    <button
+                        onClick={onClose}
+                        className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 sm:hidden touch-feedback"
+                    >
+                        ✕
+                    </button>
                     <div className="relative inline-block">
                         <UserAvatar
                             avatarUrl={avatarType === 'image' ? avatarUrl : undefined}
@@ -158,7 +165,7 @@ export default function ProfilePopup({ user, onClose, onUpdate }: ProfilePopupPr
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as 'status' | 'avatar' | 'name')}
-                            className={`flex-1 py-2 text-sm transition ${activeTab === tab.id
+                            className={`flex-1 py-3 text-sm transition touch-feedback ${activeTab === tab.id
                                 ? 'text-[var(--hf-text)] border-b-2 border-[var(--hf-yellow)]'
                                 : 'text-[var(--hf-text-muted)]'
                                 }`}
@@ -169,7 +176,7 @@ export default function ProfilePopup({ user, onClose, onUpdate }: ProfilePopupPr
                 </div>
 
                 {/* Content */}
-                <div className="p-4 max-h-[40vh] overflow-y-auto">
+                <div className="p-4 max-h-[40vh] overflow-y-auto scroll-smooth">
                     {activeTab === 'status' && (
                         <div className="space-y-3">
                             <div className="flex flex-wrap gap-2">
