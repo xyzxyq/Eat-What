@@ -53,7 +53,8 @@ export async function GET() {
         return NextResponse.json({
             ...user,
             email: maskedEmail,
-            partnerName: partner?.displayName || partner?.nickname || '伴侣'
+            partnerName: partner?.displayName || partner?.nickname || '伴侣',
+            hasPartner: !!partner
         })
     } catch (error) {
         console.error('Get settings error:', error)

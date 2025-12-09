@@ -19,6 +19,7 @@ interface UserSettings {
     notifyOnSecretWishRequest: boolean
     notifyOnSecretWishResponse: boolean
     partnerName: string
+    hasPartner: boolean
 }
 
 interface SettingsModalProps {
@@ -247,8 +248,23 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             {/* 通知设置 */}
                             {activeTab === 'notifications' && settings && (
                                 <div className="space-y-4">
+                                    {!settings.hasPartner && (
+                                        <div className="p-4 bg-gradient-to-br from-pink-50 to-purple-50 rounded-xl border border-purple-200">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-xl">💌</span>
+                                                <span className="font-medium text-[var(--hf-text)]">等待伴侣加入</span>
+                                            </div>
+                                            <p className="text-sm text-[var(--hf-text-muted)]">
+                                                当 TA 加入你的空间后，就可以开启通知功能啦 💕
+                                            </p>
+                                        </div>
+                                    )}
+
                                     <p className="text-xs text-[var(--hf-text-muted)]">
-                                        当 {settings.partnerName} 有以下动态时，发送邮件通知到 {settings.email || '你的邮箱'}
+                                        {settings.hasPartner
+                                            ? `当 ${settings.partnerName} 有以下动态时，发送邮件通知到 ${settings.email || '你的邮箱'}`
+                                            : '伴侣加入后，你可以设置以下通知选项'
+                                        }
                                     </p>
 
                                     {[
@@ -260,7 +276,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     ].map(item => (
                                         <label
                                             key={item.key}
-                                            className="flex items-center justify-between p-4 bg-[var(--hf-bg)] rounded-xl cursor-pointer hover:bg-opacity-80 transition"
+                                            className={`flex items-center justify-between p-4 bg-[var(--hf-bg)] rounded-xl transition ${settings.hasPartner
+                                                    ? 'cursor-pointer hover:bg-opacity-80'
+                                                    : 'opacity-50 cursor-not-allowed'
+                                                }`}
                                         >
                                             <span className="flex items-center gap-3">
                                                 <span className="text-xl">{item.icon}</span>
@@ -270,7 +289,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                                 type="checkbox"
                                                 checked={settings[item.key as keyof UserSettings] as boolean}
                                                 onChange={(e) => updateSettings({ [item.key]: e.target.checked })}
-                                                disabled={saving}
+                                                disabled={saving || !settings.hasPartner}
                                                 className="w-5 h-5 accent-[var(--hf-yellow)]"
                                             />
                                         </label>

@@ -3,9 +3,19 @@ import { prisma } from '@/lib/prisma'
 import { createToken } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
+// 生成6位随机绑定码
+function generateInviteCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+function getRandomEmoji(): string {
+    const emojis = ['💕', '💖', '💗', '💝', '💘', '🦋', '🌸', '🌺', '🌷', '🌹', '✨', '🌙', '⭐', '🎀', '🍀']
+    return emojis[Math.floor(Math.random() * emojis.length)]
+}
+
 export async function POST(request: NextRequest) {
     try {
-        const { passphrase, nickname } = await request.json()
+        const { passphrase, nickname, inviteCode } = await request.json()
 
         // 验证输入
         if (!passphrase || !nickname) {
@@ -32,7 +42,7 @@ export async function POST(request: NextRequest) {
         // 对口令进行哈希处理（用于查找）
         const passphraseHash = await bcrypt.hash(passphrase, 10)
 
-        // 查找是否有匹配的空间（需要遍历比对，因为bcrypt每次hash结果不同）
+        // 查找是否有匹配的空间
         const allSpaces = await prisma.coupleSpace.findMany({
             include: { users: true }
         })
@@ -46,11 +56,14 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // 如果空间不存在，创建新空间
+        // 如果空间不存在，创建新空间（第一个用户）
         if (!coupleSpace) {
+            const newInviteCode = generateInviteCode()
+
             coupleSpace = await prisma.coupleSpace.create({
                 data: {
                     passphraseHash,
+                    inviteCode: newInviteCode,
                     users: {
                         create: {
                             nickname,
@@ -77,24 +90,25 @@ export async function POST(request: NextRequest) {
                     avatarEmoji: user.avatarEmoji
                 },
                 isNewSpace: true,
-                needEmailBinding: true  // 新用户需要绑定邮箱
+                inviteCode: newInviteCode,  // 返回绑定码给第一个用户
+                needEmailBinding: true
             })
 
             response.cookies.set('auth-token', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'lax',
-                maxAge: 30 * 24 * 60 * 60 // 30 days
+                maxAge: 30 * 24 * 60 * 60
             })
 
             return response
         }
 
-        // 空间存在，检查用户
+        // 空间存在，检查用户是否已在空间中
         const existingUser = coupleSpace.users.find((u: { nickname: string }) => u.nickname === nickname)
 
         if (existingUser) {
-            // 用户已存在，直接登录
+            // 用户已存在，直接登录（不需要绑定码）
             const token = await createToken({
                 userId: existingUser.id,
                 nickname: existingUser.nickname,
@@ -110,7 +124,7 @@ export async function POST(request: NextRequest) {
                     avatarEmoji: existingUser.avatarEmoji
                 },
                 isNewSpace: false,
-                needEmailBinding: !existingUser.isEmailVerified  // 未验证邮箱需要绑定
+                needEmailBinding: !existingUser.isEmailVerified
             })
 
             response.cookies.set('auth-token', token, {
@@ -131,7 +145,26 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // 创建新用户
+        // 新用户加入现有空间，需要验证绑定码
+        if (!inviteCode) {
+            return NextResponse.json(
+                {
+                    error: '需要输入绑定码才能加入此空间 🔐',
+                    requireInviteCode: true  // 告诉前端需要显示绑定码输入框
+                },
+                { status: 400 }
+            )
+        }
+
+        // 验证绑定码
+        if (coupleSpace.inviteCode !== inviteCode) {
+            return NextResponse.json(
+                { error: '绑定码不正确，请向你的另一半确认 💔' },
+                { status: 400 }
+            )
+        }
+
+        // 绑定码正确，创建新用户
         const newUser = await prisma.user.create({
             data: {
                 nickname,
@@ -156,7 +189,7 @@ export async function POST(request: NextRequest) {
             },
             isNewSpace: false,
             partnerJoined: true,
-            needEmailBinding: true  // 新用户需要绑定邮箱
+            needEmailBinding: true
         })
 
         response.cookies.set('auth-token', token, {
@@ -175,9 +208,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         )
     }
-}
-
-function getRandomEmoji(): string {
-    const emojis = ['💕', '💖', '💗', '💝', '💘', '🦋', '🌸', '🌺', '🌷', '🌹', '✨', '🌙', '⭐', '🎀', '🍀']
-    return emojis[Math.floor(Math.random() * emojis.length)]
 }

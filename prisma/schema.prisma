@@ -9,6 +9,7 @@ datasource db {
 model CoupleSpace {
   id             String        @id @default(uuid())
   passphraseHash String        @unique
+  inviteCode     String?       @unique  // 6位邀请绑定码，可空用于迁移
   startDate      DateTime?
   theme          String        @default("yellow")
   createdAt      DateTime      @default(now())

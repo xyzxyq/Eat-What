@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import UserAvatar from '@/components/UserAvatar'
+import InvitePartnerCard from '@/components/InvitePartnerCard'
 
 interface UserData {
     id: string
@@ -56,6 +57,7 @@ const themeEmojis: Record<string, { floating: string[], orbiting: string[], shim
 export default function CoupleCard({ currentUser, partner, onAvatarClick, theme = 'yellow' }: CoupleCardProps) {
     const [heartBeat, setHeartBeat] = useState(false)
     const [currentTheme, setCurrentTheme] = useState(theme)
+    const [showInvite, setShowInvite] = useState(false)
 
     // Listen for theme changes from document
     useEffect(() => {
@@ -490,12 +492,16 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                     </div>
                 ) : (
                     <div className="avatar-container">
-                        <div className="avatar-wrapper flex flex-col items-center opacity-50">
-                            <div className="w-12 h-12 rounded-full bg-[var(--hf-border)] flex items-center justify-center text-2xl">
-                                ?
+                        <button
+                            onClick={() => setShowInvite(true)}
+                            className="avatar-wrapper flex flex-col items-center group cursor-pointer"
+                            title="点击邀请伴侣"
+                        >
+                            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-pink-100 to-purple-100 border-2 border-dashed border-purple-300 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                                💌
                             </div>
-                            <span className="waiting-text mt-2">等待加入...</span>
-                        </div>
+                            <span className="waiting-text mt-2 text-purple-500 group-hover:text-purple-600">邀请 TA</span>
+                        </button>
                     </div>
                 )}
             </div>
@@ -513,10 +519,21 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
             <div className="text-center mt-6 relative z-10">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/50 rounded-full border border-[var(--hf-yellow-light)]">
                     <span className="text-lg">💝</span>
-                    <span className="text-sm font-medium text-[var(--hf-text)]">你们的专属空间</span>
+                    <span className="text-sm font-medium text-[var(--hf-text)]">
+                        {partner ? '你们的专属空间' : '等待 TA 加入...'}
+                    </span>
                     <span className="text-lg">💝</span>
                 </div>
             </div>
+
+            {/* Invite Partner Modal */}
+            {showInvite && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4" onClick={() => setShowInvite(false)}>
+                    <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md">
+                        <InvitePartnerCard onClose={() => setShowInvite(false)} />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
