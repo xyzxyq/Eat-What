@@ -5,8 +5,9 @@ FROM node:22-alpine AS base
 FROM base AS deps
 WORKDIR /app
 
-# 复制 package 文件
+# 复制 package 文件和 prisma schema (需要在 npm ci 前复制，因为 postinstall 会运行 prisma generate)
 COPY package.json package-lock.json* ./
+COPY prisma ./prisma
 
 # 安装依赖（使用 npm ci 更快更可靠）
 RUN npm ci
