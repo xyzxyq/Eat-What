@@ -24,6 +24,8 @@ export async function GET() {
                 notifyOnMoment: true,
                 notifyOnComment: true,
                 notifyOnWish: true,
+                notifyOnSecretWishRequest: true,
+                notifyOnSecretWishResponse: true,
             }
         })
 
@@ -74,7 +76,9 @@ export async function PUT(request: NextRequest) {
             status,
             notifyOnMoment,
             notifyOnComment,
-            notifyOnWish
+            notifyOnWish,
+            notifyOnSecretWishRequest,
+            notifyOnSecretWishResponse
         } = body
 
         // 构建更新数据
@@ -86,6 +90,8 @@ export async function PUT(request: NextRequest) {
         if (notifyOnMoment !== undefined) updateData.notifyOnMoment = notifyOnMoment
         if (notifyOnComment !== undefined) updateData.notifyOnComment = notifyOnComment
         if (notifyOnWish !== undefined) updateData.notifyOnWish = notifyOnWish
+        if (notifyOnSecretWishRequest !== undefined) updateData.notifyOnSecretWishRequest = notifyOnSecretWishRequest
+        if (notifyOnSecretWishResponse !== undefined) updateData.notifyOnSecretWishResponse = notifyOnSecretWishResponse
 
         const user = await prisma.user.update({
             where: { id: session.userId },
@@ -99,6 +105,8 @@ export async function PUT(request: NextRequest) {
                 notifyOnMoment: true,
                 notifyOnComment: true,
                 notifyOnWish: true,
+                notifyOnSecretWishRequest: true,
+                notifyOnSecretWishResponse: true,
             }
         })
 

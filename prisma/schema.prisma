@@ -32,9 +32,11 @@ model User {
   email               String?             @unique  // 邮箱地址，唯一约束
   isEmailVerified     Boolean             @default(false)  // 邮箱是否已验证
   // 通知设置（默认关闭）
-  notifyOnMoment      Boolean             @default(false)  // 伴侣发日记时通知
-  notifyOnComment     Boolean             @default(false)  // 伴侣评论时通知
-  notifyOnWish        Boolean             @default(false)  // 伴侣发心愿时通知
+  notifyOnMoment            Boolean             @default(false)  // 伴侣发日记时通知
+  notifyOnComment           Boolean             @default(false)  // 伴侣评论时通知
+  notifyOnWish              Boolean             @default(false)  // 伴侣发心愿时通知
+  notifyOnSecretWishRequest Boolean             @default(true)   // 伴侣请求查看秘密心愿时通知
+  notifyOnSecretWishResponse Boolean            @default(true)   // 伴侣同意/拒绝查看请求时通知
   coupleSpaceId       String
   createdAt           DateTime            @default(now())
   coupleSpace         CoupleSpace         @relation(fields: [coupleSpaceId], references: [id])

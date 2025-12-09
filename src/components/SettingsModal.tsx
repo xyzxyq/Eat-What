@@ -16,6 +16,8 @@ interface UserSettings {
     notifyOnMoment: boolean
     notifyOnComment: boolean
     notifyOnWish: boolean
+    notifyOnSecretWishRequest: boolean
+    notifyOnSecretWishResponse: boolean
     partnerName: string
 }
 
@@ -34,6 +36,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     const [error, setError] = useState('')
 
     // 更换邮箱状态
+    const [showEmailChange, setShowEmailChange] = useState(false)
     const [newEmail, setNewEmail] = useState('')
     const [emailCode, setEmailCode] = useState('')
     const [emailStep, setEmailStep] = useState<'input' | 'verify'>('input')
@@ -61,7 +64,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             const res = await fetch('/api/user/settings')
             if (res.ok) {
                 const data = await res.json()
+                console.log('Settings loaded:', data) // Debug log
                 setSettings(data)
+            } else {
+                const errorData = await res.json().catch(() => ({}))
+                console.error('Settings API error:', res.status, errorData)
             }
         } catch (e) {
             console.error('Failed to fetch settings:', e)
@@ -159,6 +166,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             const data = await res.json()
             if (res.ok) {
                 setMessage('邮箱更换成功！')
+                setShowEmailChange(false)
                 setEmailStep('input')
                 setNewEmail('')
                 setEmailCode('')
@@ -244,9 +252,11 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                     </p>
 
                                     {[
-                                        { key: 'notifyOnMoment', icon: '📝', label: '发布日记时通知我' },
-                                        { key: 'notifyOnComment', icon: '💬', label: '评论我的日记时通知我' },
-                                        { key: 'notifyOnWish', icon: '✨', label: '添加新心愿时通知我' },
+                                        { key: 'notifyOnMoment', icon: '📝', label: '伴侣发布日记时通知我' },
+                                        { key: 'notifyOnComment', icon: '💬', label: '伴侣评论我的日记时通知我' },
+                                        { key: 'notifyOnWish', icon: '✨', label: '伴侣添加新心愿时通知我' },
+                                        { key: 'notifyOnSecretWishRequest', icon: '🔮', label: '伴侣请求查看秘密心愿时通知我' },
+                                        { key: 'notifyOnSecretWishResponse', icon: '✅', label: '伴侣同意/拒绝查看请求时通知我' },
                                     ].map(item => (
                                         <label
                                             key={item.key}
@@ -376,60 +386,113 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                             {/* 更换邮箱 */}
                             {activeTab === 'email' && settings && (
                                 <div className="space-y-4">
+                                    {/* 当前邮箱状态卡片 */}
                                     <div className="p-4 bg-[var(--hf-bg)] rounded-xl">
-                                        <p className="text-sm text-[var(--hf-text-muted)]">当前邮箱</p>
-                                        <p className="text-lg font-medium text-[var(--hf-text)]">
-                                            {settings.email || '未绑定'}
-                                        </p>
+                                        <p className="text-sm text-[var(--hf-text-muted)]">当前绑定邮箱</p>
+                                        <div className="flex items-center justify-between mt-2">
+                                            <p className="text-lg font-medium text-[var(--hf-text)]">
+                                                {settings.email || '未绑定'}
+                                            </p>
+                                            {settings.email && (
+                                                <span className={`text-xs px-2 py-1 rounded-full ${settings.isEmailVerified
+                                                    ? 'bg-green-100 text-green-600'
+                                                    : 'bg-yellow-100 text-yellow-600'
+                                                    }`}>
+                                                    {settings.isEmailVerified ? '✓ 已验证' : '⚠ 未验证'}
+                                                </span>
+                                            )}
+                                        </div>
+                                        {settings.email && (
+                                            <p className="text-xs text-[var(--hf-text-muted)] mt-2">
+                                                通知邮件将发送到此邮箱
+                                            </p>
+                                        )}
                                     </div>
 
-                                    {emailStep === 'input' ? (
-                                        <>
-                                            <input
-                                                type="email"
-                                                value={newEmail}
-                                                onChange={(e) => setNewEmail(e.target.value)}
-                                                placeholder="输入新邮箱..."
-                                                className="hf-input"
-                                            />
-                                            <button
-                                                onClick={handleSendEmailCode}
-                                                disabled={saving || !newEmail || countdown > 0}
-                                                className="hf-button w-full justify-center"
-                                            >
-                                                {saving ? '发送中...' : countdown > 0 ? `${countdown}秒后重试` : '发送验证码'}
-                                            </button>
-                                        </>
+                                    {/* 更换邮箱按钮或表单 */}
+                                    {!showEmailChange ? (
+                                        <button
+                                            onClick={() => setShowEmailChange(true)}
+                                            className="w-full p-4 bg-[var(--hf-bg)] rounded-xl text-left hover:bg-opacity-80 transition"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="flex items-center gap-3">
+                                                    <span className="text-xl">✉️</span>
+                                                    <span className="text-sm text-[var(--hf-text)]">
+                                                        {settings.email ? '更换邮箱绑定' : '绑定邮箱'}
+                                                    </span>
+                                                </span>
+                                                <span className="text-[var(--hf-text-muted)]">→</span>
+                                            </div>
+                                        </button>
                                     ) : (
-                                        <>
-                                            <p className="text-sm text-[var(--hf-text-muted)]">
-                                                验证码已发送至 <strong>{newEmail}</strong>
-                                            </p>
-                                            <input
-                                                type="text"
-                                                value={emailCode}
-                                                onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                                                placeholder="输入6位验证码..."
-                                                className="hf-input text-center text-2xl tracking-[0.5em]"
-                                                maxLength={6}
-                                            />
-                                            <button
-                                                onClick={handleVerifyEmail}
-                                                disabled={saving || emailCode.length !== 6}
-                                                className="hf-button w-full justify-center"
-                                            >
-                                                {saving ? '验证中...' : '验证并更换'}
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setEmailStep('input')
-                                                    setEmailCode('')
-                                                }}
-                                                className="text-sm text-[var(--hf-text-muted)] hover:underline w-full text-center"
-                                            >
-                                                ← 返回修改邮箱
-                                            </button>
-                                        </>
+                                        <div className="p-4 bg-[var(--hf-bg)] rounded-xl space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-medium text-[var(--hf-text)]">
+                                                    {settings.email ? '更换邮箱' : '绑定新邮箱'}
+                                                </span>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowEmailChange(false)
+                                                        setEmailStep('input')
+                                                        setNewEmail('')
+                                                        setEmailCode('')
+                                                    }}
+                                                    className="text-xs text-[var(--hf-text-muted)] hover:text-[var(--hf-text)]"
+                                                >
+                                                    取消
+                                                </button>
+                                            </div>
+
+                                            {emailStep === 'input' ? (
+                                                <>
+                                                    <input
+                                                        type="email"
+                                                        value={newEmail}
+                                                        onChange={(e) => setNewEmail(e.target.value)}
+                                                        placeholder="输入新邮箱..."
+                                                        className="hf-input"
+                                                    />
+                                                    <button
+                                                        onClick={handleSendEmailCode}
+                                                        disabled={saving || !newEmail || countdown > 0}
+                                                        className="hf-button w-full justify-center"
+                                                    >
+                                                        {saving ? '发送中...' : countdown > 0 ? `${countdown}秒后重试` : '发送验证码'}
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <p className="text-sm text-[var(--hf-text-muted)]">
+                                                        验证码已发送至 <strong>{newEmail}</strong>
+                                                    </p>
+                                                    <input
+                                                        type="text"
+                                                        value={emailCode}
+                                                        onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                        placeholder="输入6位验证码..."
+                                                        className="hf-input text-center text-2xl tracking-[0.5em]"
+                                                        maxLength={6}
+                                                    />
+                                                    <button
+                                                        onClick={handleVerifyEmail}
+                                                        disabled={saving || emailCode.length !== 6}
+                                                        className="hf-button w-full justify-center"
+                                                    >
+                                                        {saving ? '验证中...' : '验证并更换'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setEmailStep('input')
+                                                            setEmailCode('')
+                                                        }}
+                                                        className="text-sm text-[var(--hf-text-muted)] hover:underline w-full text-center"
+                                                    >
+                                                        ← 返回修改邮箱
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             )}
