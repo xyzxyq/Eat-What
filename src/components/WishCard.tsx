@@ -303,9 +303,12 @@ export default function WishCard({ wish, users, currentUserId, onUpdate }: WishC
                     gap: 8px;
                     margin-top: 12px;
                     align-items: flex-end;
+                    max-width: 100%;
+                    overflow: hidden;
                 }
                 .comment-input {
                     flex: 1;
+                    min-width: 0; /* Allow flex item to shrink below content size */
                     padding: 8px 12px;
                     border: 1px solid var(--hf-border);
                     border-radius: 16px;
@@ -330,6 +333,7 @@ export default function WishCard({ wish, users, currentUserId, onUpdate }: WishC
                     font-size: 13px;
                     cursor: pointer;
                     transition: opacity 0.2s;
+                    flex-shrink: 0; /* Prevent button from shrinking */
                 }
                 .comment-submit:disabled {
                     opacity: 0.5;
@@ -354,6 +358,18 @@ export default function WishCard({ wish, users, currentUserId, onUpdate }: WishC
                 .complete-btn.done {
                     background: var(--hf-yellow);
                     border-color: var(--hf-yellow);
+                }
+                
+                /* Mobile responsive styles */
+                @media (max-width: 480px) {
+                    .comment-input {
+                        font-size: 16px; /* Prevent iOS zoom on focus */
+                        padding: 8px 10px;
+                    }
+                    .comment-submit {
+                        padding: 8px 12px;
+                        font-size: 12px;
+                    }
                 }
             `}</style>
 

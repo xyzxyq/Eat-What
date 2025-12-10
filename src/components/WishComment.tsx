@@ -75,10 +75,12 @@ export default function WishComment({
     }
 
     return (
-        <div className={`wish-comment ${level > 0 ? 'ml-6 border-l-2 border-[var(--hf-border)] pl-3' : ''}`}>
+        <div className={`wish-comment ${level > 0 ? 'ml-4 sm:ml-6 border-l-2 border-[var(--hf-border)] pl-2 sm:pl-3' : ''}`}>
             <style jsx>{`
                 .wish-comment {
                     margin-top: 8px;
+                    max-width: 100%;
+                    overflow: hidden;
                 }
                 .comment-header {
                     display: flex;
@@ -90,6 +92,8 @@ export default function WishComment({
                     color: var(--hf-text);
                     font-size: 14px;
                     line-height: 1.5;
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
                 }
                 .comment-actions {
                     margin-left: 32px;
@@ -109,6 +113,8 @@ export default function WishComment({
                 .reply-box {
                     margin-left: 32px;
                     margin-top: 8px;
+                    max-width: 100%;
+                    overflow: hidden;
                 }
                 .reply-input {
                     width: 100%;
@@ -161,6 +167,19 @@ export default function WishComment({
                     cursor: pointer;
                     margin-left: 32px;
                     margin-top: 4px;
+                }
+                
+                /* Mobile responsive - reduce indentation */
+                @media (max-width: 480px) {
+                    .comment-content,
+                    .comment-actions,
+                    .reply-box,
+                    .collapse-btn {
+                        margin-left: 24px;
+                    }
+                    .reply-input {
+                        font-size: 16px; /* Prevent iOS zoom */
+                    }
                 }
             `}</style>
 

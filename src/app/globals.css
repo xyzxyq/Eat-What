@@ -87,6 +87,22 @@ body {
   color: var(--hf-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
+  overflow-x: hidden; /* Prevent horizontal scroll on mobile */
+}
+
+/* Global box-sizing for proper width calculations */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Ensure all inputs and textareas respect container width */
+input,
+textarea,
+select,
+button {
+  max-width: 100%;
 }
 
 /* Custom Scrollbar */
