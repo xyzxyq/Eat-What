@@ -484,7 +484,8 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                         padding: 16px 12px;
                         padding-top: 28px;
                         border-radius: 16px;
-                        overflow: visible;
+                        overflow-x: hidden;
+                        overflow-y: visible;
                     }
 
                     .avatar-container {

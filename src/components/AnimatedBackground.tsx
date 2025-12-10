@@ -51,8 +51,8 @@ export default function AnimatedBackground() {
                 className="absolute w-72 h-72 rounded-full blur-2xl opacity-15"
                 style={{
                     background: 'linear-gradient(135deg, var(--hf-yellow) 0%, #ff69b4 100%)',
-                    top: '10%',
-                    right: '-10%',
+                    top: '5%',
+                    right: '0%',
                     animation: 'float-slow 25s ease-in-out infinite',
                     willChange: 'transform',
                 }}
@@ -62,7 +62,7 @@ export default function AnimatedBackground() {
                 style={{
                     background: 'linear-gradient(135deg, #ff69b4 0%, #9370db 100%)',
                     bottom: '5%',
-                    left: '-5%',
+                    left: '0%',
                     animation: 'float-slow 30s ease-in-out infinite reverse',
                     willChange: 'transform',
                 }}
