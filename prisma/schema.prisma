@@ -12,6 +12,8 @@ model CoupleSpace {
   inviteCode     String?       @unique  // 6位邀请绑定码，可空用于迁移
   startDate      DateTime?
   theme          String        @default("yellow")
+  effectIntensity String       @default("subtle")   // 效果强度: subtle | obvious
+  effectArea      String       @default("local")    // 效果范围: local | fullpage
   createdAt      DateTime      @default(now())
   users          User[]
   moments        Moment[]

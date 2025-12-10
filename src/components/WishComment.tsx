@@ -114,10 +114,16 @@ export default function WishComment({
                     width: 100%;
                     padding: 8px 12px;
                     border: 1px solid var(--hf-border);
-                    border-radius: 8px;
+                    border-radius: 12px;
                     font-size: 13px;
                     outline: none;
                     transition: border-color 0.2s;
+                    resize: none;
+                    min-height: 32px;
+                    max-height: 100px;
+                    overflow-y: auto;
+                    line-height: 1.4;
+                    font-family: inherit;
                 }
                 .reply-input:focus {
                     border-color: var(--hf-yellow);
@@ -186,13 +192,23 @@ export default function WishComment({
 
             {isReplying && (
                 <div className="reply-box">
-                    <input
-                        type="text"
+                    <textarea
                         className="reply-input"
                         placeholder="写下你的回复..."
                         value={replyContent}
-                        onChange={(e) => setReplyContent(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleSubmitReply()}
+                        onChange={(e) => {
+                            setReplyContent(e.target.value)
+                            // Auto-resize textarea
+                            e.target.style.height = 'auto'
+                            e.target.style.height = Math.min(e.target.scrollHeight, 100) + 'px'
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault()
+                                handleSubmitReply()
+                            }
+                        }}
+                        rows={1}
                     />
                     <div className="reply-buttons">
                         <button

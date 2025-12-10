@@ -16,7 +16,9 @@ export async function GET() {
 
         return NextResponse.json({
             startDate: coupleSpace?.startDate || null,
-            theme: coupleSpace?.theme || 'yellow'
+            theme: coupleSpace?.theme || 'yellow',
+            effectIntensity: coupleSpace?.effectIntensity || 'subtle',
+            effectArea: coupleSpace?.effectArea || 'local'
         })
     } catch (error) {
         console.error('Get space error:', error)
@@ -46,6 +48,20 @@ export async function PUT(request: NextRequest) {
             }
         }
 
+        if ('effectIntensity' in body) {
+            const validIntensities = ['subtle', 'obvious']
+            if (validIntensities.includes(body.effectIntensity)) {
+                updateData.effectIntensity = body.effectIntensity
+            }
+        }
+
+        if ('effectArea' in body) {
+            const validAreas = ['local', 'fullpage']
+            if (validAreas.includes(body.effectArea)) {
+                updateData.effectArea = body.effectArea
+            }
+        }
+
         const coupleSpace = await prisma.coupleSpace.update({
             where: { id: session.coupleSpaceId },
             data: updateData
@@ -54,7 +70,9 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({
             success: true,
             startDate: coupleSpace.startDate,
-            theme: coupleSpace.theme
+            theme: coupleSpace.theme,
+            effectIntensity: coupleSpace.effectIntensity,
+            effectArea: coupleSpace.effectArea
         })
     } catch (error) {
         console.error('Update space error:', error)

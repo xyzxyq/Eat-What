@@ -25,9 +25,10 @@ interface UserSettings {
 interface SettingsModalProps {
     isOpen: boolean
     onClose: () => void
+    onSettingsChange?: () => void  // 设置更改时通知父组件
 }
 
-export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+export default function SettingsModal({ isOpen, onClose, onSettingsChange }: SettingsModalProps) {
     const router = useRouter()
     const [settings, setSettings] = useState<UserSettings | null>(null)
     const [loading, setLoading] = useState(true)
@@ -45,6 +46,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
     // 主题状态
     const [currentTheme, setCurrentTheme] = useState('yellow')
+    const [effectIntensity, setEffectIntensity] = useState<'subtle' | 'obvious'>('subtle')
+    const [effectArea, setEffectArea] = useState<'local' | 'fullpage'>('local')
 
     useEffect(() => {
         if (isOpen) {
@@ -84,6 +87,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             if (res.ok) {
                 const data = await res.json()
                 setCurrentTheme(data.theme || 'yellow')
+                setEffectIntensity(data.effectIntensity || 'subtle')
+                setEffectArea(data.effectArea || 'local')
             }
         } catch (e) {
             console.error('Failed to fetch theme:', e)
@@ -128,6 +133,26 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             console.error('Failed to update theme:', e)
         }
     }
+
+    const handleEffectChange = async (key: 'effectIntensity' | 'effectArea', value: string) => {
+        try {
+            await fetch('/api/space', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ [key]: value })
+            })
+            if (key === 'effectIntensity') {
+                setEffectIntensity(value as 'subtle' | 'obvious')
+            } else {
+                setEffectArea(value as 'local' | 'fullpage')
+            }
+            // 通知父组件设置已更改
+            onSettingsChange?.()
+        } catch (e) {
+            console.error('Failed to update effect settings:', e)
+        }
+    }
+
 
     const handleSendEmailCode = async () => {
         if (!newEmail || countdown > 0) return
@@ -277,8 +302,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                                         <label
                                             key={item.key}
                                             className={`flex items-center justify-between p-4 bg-[var(--hf-bg)] rounded-xl transition ${settings.hasPartner
-                                                    ? 'cursor-pointer hover:bg-opacity-80'
-                                                    : 'opacity-50 cursor-not-allowed'
+                                                ? 'cursor-pointer hover:bg-opacity-80'
+                                                : 'opacity-50 cursor-not-allowed'
                                                 }`}
                                         >
                                             <span className="flex items-center gap-3">
@@ -299,26 +324,93 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
                             {/* 主题设置 */}
                             {activeTab === 'theme' && (
-                                <div className="space-y-4">
-                                    <p className="text-xs text-[var(--hf-text-muted)]">选择主题颜色</p>
-                                    <div className="grid grid-cols-3 gap-3">
-                                        {THEMES.map(theme => (
-                                            <button
-                                                key={theme.id}
-                                                onClick={() => handleThemeChange(theme.id)}
-                                                className={`flex flex-col items-center p-4 rounded-xl border-2 transition ${currentTheme === theme.id
-                                                    ? 'border-[var(--hf-yellow)] bg-[var(--hf-yellow-light)]'
-                                                    : 'border-[var(--hf-border)] hover:border-[var(--hf-yellow)]'
-                                                    }`}
-                                            >
-                                                <span className="text-2xl">{theme.emoji}</span>
-                                                <span
-                                                    className="w-6 h-6 rounded-full my-2 border border-white shadow"
-                                                    style={{ backgroundColor: theme.color }}
-                                                />
-                                                <span className="text-xs text-[var(--hf-text)]">{theme.name}</span>
-                                            </button>
-                                        ))}
+                                <div className="space-y-6">
+                                    <div className="space-y-3">
+                                        <p className="text-xs text-[var(--hf-text-muted)]">选择主题颜色</p>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            {THEMES.map(theme => (
+                                                <button
+                                                    key={theme.id}
+                                                    onClick={() => handleThemeChange(theme.id)}
+                                                    className={`flex flex-col items-center p-4 rounded-xl border-2 transition ${currentTheme === theme.id
+                                                        ? 'border-[var(--hf-yellow)] bg-[var(--hf-yellow-light)]'
+                                                        : 'border-[var(--hf-border)] hover:border-[var(--hf-yellow)]'
+                                                        }`}
+                                                >
+                                                    <span className="text-2xl">{theme.emoji}</span>
+                                                    <span
+                                                        className="w-6 h-6 rounded-full my-2 border border-white shadow"
+                                                        style={{ backgroundColor: theme.color }}
+                                                    />
+                                                    <span className="text-xs text-[var(--hf-text)]">{theme.name}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* 互动效果设置 */}
+                                    <div className="border-t border-[var(--hf-border)] pt-4 space-y-4">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-lg">✨</span>
+                                            <span className="text-sm font-medium text-[var(--hf-text)]">互动效果设置</span>
+                                        </div>
+                                        <p className="text-xs text-[var(--hf-text-muted)]">
+                                            当伴侣点击亲亲/抱抱/晚安时，页面会显示动态效果
+                                        </p>
+
+                                        {/* 效果强度 */}
+                                        <div className="p-4 bg-[var(--hf-bg)] rounded-xl space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm text-[var(--hf-text)]">效果强度</span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleEffectChange('effectIntensity', 'subtle')}
+                                                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition ${effectIntensity === 'subtle'
+                                                        ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
+                                                        : 'bg-white border border-[var(--hf-border)] text-[var(--hf-text-muted)] hover:border-[var(--hf-yellow)]'
+                                                        }`}
+                                                >
+                                                    🌸 微妙
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEffectChange('effectIntensity', 'obvious')}
+                                                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition ${effectIntensity === 'obvious'
+                                                        ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
+                                                        : 'bg-white border border-[var(--hf-border)] text-[var(--hf-text-muted)] hover:border-[var(--hf-yellow)]'
+                                                        }`}
+                                                >
+                                                    🌟 明显
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* 效果范围 */}
+                                        <div className="p-4 bg-[var(--hf-bg)] rounded-xl space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm text-[var(--hf-text)]">效果范围</span>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => handleEffectChange('effectArea', 'local')}
+                                                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition ${effectArea === 'local'
+                                                        ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
+                                                        : 'bg-white border border-[var(--hf-border)] text-[var(--hf-text-muted)] hover:border-[var(--hf-yellow)]'
+                                                        }`}
+                                                >
+                                                    📍 局部
+                                                </button>
+                                                <button
+                                                    onClick={() => handleEffectChange('effectArea', 'fullpage')}
+                                                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition ${effectArea === 'fullpage'
+                                                        ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
+                                                        : 'bg-white border border-[var(--hf-border)] text-[var(--hf-text-muted)] hover:border-[var(--hf-yellow)]'
+                                                        }`}
+                                                >
+                                                    🌍 整页
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             )}

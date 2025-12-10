@@ -18,6 +18,11 @@ interface CoupleCardProps {
     partner: UserData | undefined
     onAvatarClick: () => void
     theme?: string
+    interactionEffects?: {
+        kiss: { partnerDone: boolean; bothDone: boolean }
+        hug: { partnerDone: boolean; bothDone: boolean }
+        goodnight: { partnerDone: boolean; bothDone: boolean }
+    }
 }
 
 // Theme-based emoji configurations
@@ -54,7 +59,7 @@ const themeEmojis: Record<string, { floating: string[], orbiting: string[], shim
     }
 }
 
-export default function CoupleCard({ currentUser, partner, onAvatarClick, theme = 'yellow' }: CoupleCardProps) {
+export default function CoupleCard({ currentUser, partner, onAvatarClick, theme = 'yellow', interactionEffects }: CoupleCardProps) {
     const [heartBeat, setHeartBeat] = useState(false)
     const [currentTheme, setCurrentTheme] = useState(theme)
     const [showInvite, setShowInvite] = useState(false)
@@ -122,17 +127,44 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
         setTimeout(() => setHeartBeat(false), 600)
     }
 
+    // 计算互动效果状态
+    const hasKissEffect = interactionEffects?.kiss?.partnerDone || interactionEffects?.kiss?.bothDone
+    const hasHugEffect = interactionEffects?.hug?.partnerDone || interactionEffects?.hug?.bothDone
+    const hasGoodnightEffect = interactionEffects?.goodnight?.partnerDone || interactionEffects?.goodnight?.bothDone
+    const hasAnyEffect = hasKissEffect || hasHugEffect || hasGoodnightEffect
+
+    // 使用主题颜色生成动态样式
+    const themeColor = themeConfig.shimmerColor.replace('0.1', '')
+    const effectGlowStyle = hasAnyEffect
+        ? `0 0 30px ${themeColor}0.5), 0 0 60px ${themeColor}0.3), 0 8px 32px ${themeConfig.shimmerColor.replace('0.1', '0.2')}`
+        : `0 8px 32px ${themeConfig.shimmerColor.replace('0.1', '0.15')}`
+
     return (
-        <div className="couple-card">
+        <div className={`couple-card ${hasAnyEffect ? 'has-interaction-effect' : ''}`}>
             <style jsx>{`
                 .couple-card {
                     background: linear-gradient(135deg, var(--hf-yellow-light) 0%, white 50%, var(--hf-yellow-light) 100%);
                     border-radius: 20px;
                     padding: 20px;
                     border: 2px solid var(--hf-yellow);
-                    box-shadow: 0 8px 32px ${themeConfig.shimmerColor.replace('0.1', '0.15')};
+                    box-shadow: ${effectGlowStyle};
                     position: relative;
                     overflow: hidden;
+                    transition: box-shadow 0.5s ease, border-color 0.5s ease;
+                }
+
+                .couple-card.has-interaction-effect {
+                    border-color: ${themeColor}0.7);
+                    animation: card-pulse 2s ease-in-out infinite;
+                }
+
+                @keyframes card-pulse {
+                    0%, 100% {
+                        transform: scale(1);
+                    }
+                    50% {
+                        transform: scale(1.01);
+                    }
                 }
 
                 .couple-card::before {
@@ -449,8 +481,10 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 /* Mobile responsive styles */
                 @media (max-width: 480px) {
                     .couple-card {
-                        padding: 12px;
+                        padding: 16px 12px;
+                        padding-top: 28px;
                         border-radius: 16px;
+                        overflow: visible;
                     }
 
                     .avatar-container {
@@ -470,6 +504,28 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                         padding: 4px 10px;
                         font-size: 11px;
                         max-width: 75px;
+                    }
+
+                    /* 移动端想TA徽章 - 移到头像上方 */
+                    .miss-you-bubble {
+                        left: 50%;
+                        top: -8px;
+                        transform: translateX(-50%) translateY(-100%);
+                        right: auto;
+                        padding: 4px 8px;
+                        font-size: 10px;
+                        border-radius: 10px;
+                    }
+
+                    /* 移动端想你徽章 - 移到头像上方 */
+                    .miss-you-bubble-right {
+                        left: 50%;
+                        right: auto;
+                        top: -8px;
+                        transform: translateX(-50%) translateY(-100%);
+                        padding: 4px 8px;
+                        font-size: 10px;
+                        border-radius: 10px;
                     }
 
                     .sparkle {
@@ -493,7 +549,8 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
 
                 @media (max-width: 375px) {
                     .couple-card {
-                        padding: 10px;
+                        padding: 14px 10px;
+                        padding-top: 26px;
                     }
 
                     .avatar-container {
@@ -508,6 +565,12 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                     .status-bubble {
                         max-width: 65px;
                         font-size: 10px;
+                    }
+
+                    .miss-you-bubble,
+                    .miss-you-bubble-right {
+                        font-size: 9px;
+                        padding: 3px 6px;
                     }
 
                     .floating-emoji,

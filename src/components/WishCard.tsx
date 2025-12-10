@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import UserAvatar from '@/components/UserAvatar'
 import WishComment, { WishCommentData } from '@/components/WishComment'
 
@@ -302,14 +302,21 @@ export default function WishCard({ wish, users, currentUserId, onUpdate }: WishC
                     display: flex;
                     gap: 8px;
                     margin-top: 12px;
+                    align-items: flex-end;
                 }
                 .comment-input {
                     flex: 1;
                     padding: 8px 12px;
                     border: 1px solid var(--hf-border);
-                    border-radius: 20px;
+                    border-radius: 16px;
                     font-size: 13px;
                     outline: none;
+                    resize: none;
+                    min-height: 36px;
+                    max-height: 120px;
+                    overflow-y: auto;
+                    line-height: 1.4;
+                    font-family: inherit;
                 }
                 .comment-input:focus {
                     border-color: var(--hf-yellow);
@@ -456,13 +463,23 @@ export default function WishCard({ wish, users, currentUserId, onUpdate }: WishC
                     ) : (
                         <>
                             <div className="comment-input-box">
-                                <input
-                                    type="text"
+                                <textarea
                                     className="comment-input"
                                     placeholder="写下你的想法..."
                                     value={newComment}
-                                    onChange={(e) => setNewComment(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleAddComment()}
+                                    onChange={(e) => {
+                                        setNewComment(e.target.value)
+                                        // Auto-resize textarea
+                                        e.target.style.height = 'auto'
+                                        e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px'
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault()
+                                            handleAddComment()
+                                        }
+                                    }}
+                                    rows={1}
                                 />
                                 <button
                                     className="comment-submit"

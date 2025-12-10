@@ -112,9 +112,15 @@ export default function CreateMoment({ onSuccess, disabled }: CreateMomentProps)
                 {/* Content Input */}
                 <textarea
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    onChange={(e) => {
+                        setContent(e.target.value)
+                        // Auto-resize textarea
+                        e.target.style.height = 'auto'
+                        e.target.style.height = Math.min(e.target.scrollHeight, 300) + 'px'
+                    }}
                     placeholder="今天想记录什么呢...✨"
                     className="hf-input min-h-32 resize-none"
+                    style={{ maxHeight: '300px', overflowY: 'auto' }}
                     required
                 />
 

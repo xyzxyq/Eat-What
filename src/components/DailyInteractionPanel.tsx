@@ -3,14 +3,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
-interface DailyInteractionPanelProps {
-    hasPartner: boolean
-}
-
-interface InteractionStatus {
+export interface InteractionStatus {
     currentUserDone: boolean
     partnerDone: boolean
     bothDone: boolean
+}
+
+interface DailyInteractionPanelProps {
+    hasPartner: boolean
+    onStatusChange?: (status: {
+        kiss: InteractionStatus
+        hug: InteractionStatus
+        goodnight: InteractionStatus
+    }) => void
 }
 
 interface StatsData {
@@ -19,7 +24,7 @@ interface StatsData {
     thisMonth: string[]
 }
 
-export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPanelProps) {
+export default function DailyInteractionPanel({ hasPartner, onStatusChange }: DailyInteractionPanelProps) {
     const [kissStatus, setKissStatus] = useState<InteractionStatus>({ currentUserDone: false, partnerDone: false, bothDone: false })
     const [kissStats, setKissStats] = useState<StatsData | null>(null)
     const [kissing, setKissing] = useState(false)
@@ -47,6 +52,18 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
     useEffect(() => {
         fetchAll()
     }, [])
+
+    // 通知父组件状态变化
+    useEffect(() => {
+        if (onStatusChange && !loading) {
+            onStatusChange({
+                kiss: kissStatus,
+                hug: hugStatus,
+                goodnight: goodnightStatus
+            })
+        }
+    }, [kissStatus, hugStatus, goodnightStatus, loading, onStatusChange])
+
 
     const fetchAll = async () => {
         try {
@@ -181,7 +198,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                     {/* 左侧：三个正方形按钮竖排 */}
                     <div className="flex flex-col gap-2">
                         {/* 亲亲按钮 */}
-                        <div className="relative">
+                        <div className="relative z-10">
                             {showKissHearts && (
                                 <div className="absolute -inset-2 pointer-events-none z-20">
                                     {[...Array(8)].map((_, i) => (
@@ -195,12 +212,13 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                             <button
                                 onClick={handleKiss}
                                 disabled={kissStatus.currentUserDone || kissing}
-                                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${kissStatus.bothDone
+                                className={`w-14 h-14 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${kissStatus.bothDone
                                     ? 'bg-gradient-to-br from-pink-200 to-red-200 border-2 border-pink-400'
                                     : kissStatus.currentUserDone
                                         ? 'bg-pink-100 border border-pink-300'
                                         : 'bg-white border border-pink-200 hover:bg-pink-50 hover:scale-105 active:scale-95'
                                     }`}
+                                style={{ touchAction: 'manipulation' }}
                                 title="每日亲亲"
                             >
                                 <span className={`text-xl ${kissing ? 'animate-bounce' : ''}`}>
@@ -214,7 +232,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                         </div>
 
                         {/* 抱抱按钮 */}
-                        <div className="relative">
+                        <div className="relative z-10">
                             {showHugEmoji && (
                                 <div className="absolute -inset-2 pointer-events-none z-20">
                                     {[...Array(8)].map((_, i) => (
@@ -228,12 +246,13 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                             <button
                                 onClick={handleHug}
                                 disabled={hugStatus.currentUserDone || hugging}
-                                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${hugStatus.bothDone
+                                className={`w-14 h-14 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${hugStatus.bothDone
                                     ? 'bg-gradient-to-br from-amber-200 to-orange-200 border-2 border-amber-400'
                                     : hugStatus.currentUserDone
                                         ? 'bg-amber-100 border border-amber-300'
                                         : 'bg-white border border-amber-200 hover:bg-amber-50 hover:scale-105 active:scale-95'
                                     }`}
+                                style={{ touchAction: 'manipulation' }}
                                 title="每日抱抱"
                             >
                                 <span className={`text-xl ${hugging ? 'animate-bounce' : ''}`}>
@@ -247,7 +266,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                         </div>
 
                         {/* 晚安按钮 */}
-                        <div className="relative">
+                        <div className="relative z-10">
                             {showStars && (
                                 <div className="absolute -inset-2 pointer-events-none z-20">
                                     {[...Array(8)].map((_, i) => (
@@ -261,7 +280,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                             <button
                                 onClick={handleGoodnight}
                                 disabled={goodnightStatus.currentUserDone || saying || !isGoodnightTime}
-                                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${goodnightStatus.bothDone
+                                className={`w-14 h-14 sm:w-14 sm:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 transition-all touch-feedback ${goodnightStatus.bothDone
                                     ? 'bg-gradient-to-br from-indigo-200 to-purple-200 border-2 border-indigo-400'
                                     : goodnightStatus.currentUserDone
                                         ? 'bg-indigo-100 border border-indigo-300'
@@ -269,6 +288,7 @@ export default function DailyInteractionPanel({ hasPartner }: DailyInteractionPa
                                             ? 'bg-gray-100 border border-gray-200 opacity-50 cursor-not-allowed'
                                             : 'bg-white border border-indigo-200 hover:bg-indigo-50 hover:scale-105 active:scale-95'
                                     }`}
+                                style={{ touchAction: 'manipulation' }}
                                 title={isGoodnightTime ? '晚安打卡' : '20:00-06:00'}
                             >
                                 <span className={`text-xl ${saying ? 'animate-bounce' : ''}`}>

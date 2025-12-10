@@ -10,8 +10,9 @@ import ProfilePopup from '@/components/ProfilePopup'
 import CoupleCard from '@/components/CoupleCard'
 import SettingsModal from '@/components/SettingsModal'
 import AnimatedBackground from '@/components/AnimatedBackground'
-import DailyInteractionPanel from '@/components/DailyInteractionPanel'
+import DailyInteractionPanel, { InteractionStatus } from '@/components/DailyInteractionPanel'
 import SwipeablePanel from '@/components/SwipeablePanel'
+import InteractionEffects from '@/components/InteractionEffects'
 
 interface UserData {
     id: string
@@ -32,6 +33,16 @@ export default function TimelinePage() {
     const [showOnboarding, setShowOnboarding] = useState(false)
     const [showProfilePopup, setShowProfilePopup] = useState(false)
     const [showSettings, setShowSettings] = useState(false)
+
+    // 互动效果状态
+    const [interactionStatus, setInteractionStatus] = useState<{
+        kiss: InteractionStatus
+        hug: InteractionStatus
+        goodnight: InteractionStatus
+    } | null>(null)
+    const [effectIntensity, setEffectIntensity] = useState<'subtle' | 'obvious'>('subtle')
+    const [effectArea, setEffectArea] = useState<'local' | 'fullpage'>('local')
+    const [currentTheme, setCurrentTheme] = useState('yellow')
 
     const fetchMoments = useCallback(async () => {
         try {
@@ -75,6 +86,26 @@ export default function TimelinePage() {
             console.error('Check onboarding error:', error)
         }
     }
+
+    // 获取效果设置的回调函数
+    const fetchEffectSettings = useCallback(async () => {
+        try {
+            const res = await fetch('/api/space')
+            if (res.ok) {
+                const data = await res.json()
+                setEffectIntensity(data.effectIntensity || 'subtle')
+                setEffectArea(data.effectArea || 'local')
+                setCurrentTheme(data.theme || 'yellow')
+            }
+        } catch (e) {
+            console.error('Failed to fetch effect settings:', e)
+        }
+    }, [])
+
+    // 初始化时获取效果设置
+    useEffect(() => {
+        fetchEffectSettings()
+    }, [fetchEffectSettings])
 
     // 检查当前用户今天是否已经发布过
     const hasPostedToday = moments.some(m => {
@@ -122,10 +153,23 @@ export default function TimelinePage() {
             <SettingsModal
                 isOpen={showSettings}
                 onClose={() => setShowSettings(false)}
+                onSettingsChange={fetchEffectSettings}
             />
 
             {/* Animated Background */}
             <AnimatedBackground />
+
+            {/* 全页互动效果 */}
+            {interactionStatus && effectArea === 'fullpage' && (
+                <InteractionEffects
+                    kissStatus={interactionStatus.kiss}
+                    hugStatus={interactionStatus.hug}
+                    goodnightStatus={interactionStatus.goodnight}
+                    intensity={effectIntensity}
+                    area="fullpage"
+                    theme={currentTheme}
+                />
+            )}
 
             {/* Header */}
             <header className="sticky top-0 z-50 border-b border-[var(--hf-border)] bg-white safe-area-top">
@@ -186,16 +230,33 @@ export default function TimelinePage() {
                 )}
 
                 {/* Couple Status Card */}
-                <div className="mb-6">
+                <div className="mb-6 relative">
+                    {/* 局部效果也可以放在CoupleCard周围 */}
                     <CoupleCard
                         currentUser={currentUser}
                         partner={partner}
                         onAvatarClick={() => setShowProfilePopup(true)}
+                        interactionEffects={interactionStatus ? {
+                            kiss: { partnerDone: interactionStatus.kiss.partnerDone, bothDone: interactionStatus.kiss.bothDone },
+                            hug: { partnerDone: interactionStatus.hug.partnerDone, bothDone: interactionStatus.hug.bothDone },
+                            goodnight: { partnerDone: interactionStatus.goodnight.partnerDone, bothDone: interactionStatus.goodnight.bothDone }
+                        } : undefined}
                     />
                 </div>
 
                 {/* Swipeable Panel: CreateMoment <-> DailyInteraction */}
-                <div className="mb-8">
+                <div className="mb-8 relative">
+                    {/* 局部效果容器 */}
+                    {interactionStatus && effectArea === 'local' && (
+                        <InteractionEffects
+                            kissStatus={interactionStatus.kiss}
+                            hugStatus={interactionStatus.hug}
+                            goodnightStatus={interactionStatus.goodnight}
+                            intensity={effectIntensity}
+                            area="local"
+                            theme={currentTheme}
+                        />
+                    )}
                     <SwipeablePanel
                         leftPanel={
                             <CreateMoment
@@ -204,7 +265,10 @@ export default function TimelinePage() {
                             />
                         }
                         rightPanel={
-                            <DailyInteractionPanel hasPartner={!!partner} />
+                            <DailyInteractionPanel
+                                hasPartner={!!partner}
+                                onStatusChange={setInteractionStatus}
+                            />
                         }
                     />
                 </div>

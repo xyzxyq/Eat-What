@@ -241,8 +241,14 @@ export default function MomentCard({ moment, isCurrentUser, onUpdate, onDelete }
                     <div className="space-y-3">
                         <textarea
                             value={editContent}
-                            onChange={(e) => setEditContent(e.target.value)}
+                            onChange={(e) => {
+                                setEditContent(e.target.value)
+                                // Auto-resize textarea
+                                e.target.style.height = 'auto'
+                                e.target.style.height = Math.min(e.target.scrollHeight, 300) + 'px'
+                            }}
                             className="hf-input min-h-24 resize-none"
+                            style={{ maxHeight: '300px', overflowY: 'auto' }}
                             placeholder="写点什么..."
                         />
                         <div className="flex justify-end gap-2">
