@@ -83,68 +83,66 @@ export default function InteractionEffects({
         return () => window.removeEventListener('resize', checkMobile)
     }, [])
 
-    // 生成粒子
+    // 生成粒子 - 大幅减少数量以提高性能
     useEffect(() => {
         const newParticles: Particle[] = []
         let particleId = 0
 
-        // 大幅增加粒子数量
-        const particleCount = isMobile ? 12 : 24
-        const baseSize = intensity === 'obvious' ? 2.0 : 1.2
+        // 显著减少粒子数量以提高性能 (原来是24/12，现在是8/4)
+        const particleCount = isMobile ? 4 : 8
+        const baseSize = intensity === 'obvious' ? 1.8 : 1.2
 
         // 使用主题emoji
         const emojis = themeConfig.emojis
 
-        // 亲亲效果粒子 - 使用主题颜色emoji
-        if (kissStatus.partnerDone || kissStatus.bothDone) {
-            const count = kissStatus.bothDone ? particleCount : Math.floor(particleCount / 2)
-            for (let i = 0; i < count; i++) {
+        // 只在bothDone时显示粒子效果，partnerDone时只显示光晕
+        // 亲亲效果粒子
+        if (kissStatus.bothDone) {
+            for (let i = 0; i < particleCount; i++) {
                 newParticles.push({
                     id: particleId++,
                     emoji: emojis[i % emojis.length],
                     x: Math.random() * 100,
                     y: Math.random() * 100,
-                    size: (1.0 + Math.random() * 1.0) * baseSize,
-                    duration: 4 + Math.random() * 4,
-                    delay: Math.random() * 3
+                    size: (1.0 + Math.random() * 0.5) * baseSize,
+                    duration: 6 + Math.random() * 4, // 延长动画周期减少CPU使用
+                    delay: Math.random() * 5
                 })
             }
         }
 
-        // 抱抱效果粒子 - 使用主题颜色emoji
-        if (hugStatus.partnerDone || hugStatus.bothDone) {
-            const count = hugStatus.bothDone ? particleCount : Math.floor(particleCount / 2)
-            for (let i = 0; i < count; i++) {
+        // 抱抱效果粒子
+        if (hugStatus.bothDone) {
+            for (let i = 0; i < particleCount; i++) {
                 newParticles.push({
                     id: particleId++,
                     emoji: emojis[(i + 2) % emojis.length],
                     x: Math.random() * 100,
                     y: Math.random() * 100,
-                    size: (1.0 + Math.random() * 1.0) * baseSize,
-                    duration: 5 + Math.random() * 4,
-                    delay: Math.random() * 3
+                    size: (1.0 + Math.random() * 0.5) * baseSize,
+                    duration: 7 + Math.random() * 4,
+                    delay: Math.random() * 5
                 })
             }
         }
 
-        // 晚安效果粒子 - 使用主题颜色emoji
-        if (goodnightStatus.partnerDone || goodnightStatus.bothDone) {
-            const count = goodnightStatus.bothDone ? particleCount : Math.floor(particleCount / 2)
-            for (let i = 0; i < count; i++) {
+        // 晚安效果粒子
+        if (goodnightStatus.bothDone) {
+            for (let i = 0; i < particleCount; i++) {
                 newParticles.push({
                     id: particleId++,
                     emoji: emojis[(i + 4) % emojis.length],
                     x: Math.random() * 100,
                     y: Math.random() * 100,
-                    size: (0.9 + Math.random() * 0.8) * baseSize,
-                    duration: 3 + Math.random() * 4,
-                    delay: Math.random() * 3
+                    size: (0.9 + Math.random() * 0.5) * baseSize,
+                    duration: 5 + Math.random() * 4,
+                    delay: Math.random() * 5
                 })
             }
         }
 
         setParticles(newParticles)
-    }, [kissStatus, hugStatus, goodnightStatus, intensity, isMobile, themeConfig])
+    }, [kissStatus.bothDone, hugStatus.bothDone, goodnightStatus.bothDone, intensity, isMobile, themeConfig])
 
     // 计算效果类名
     const hasKissEffect = kissStatus.partnerDone || kissStatus.bothDone
@@ -169,53 +167,44 @@ export default function InteractionEffects({
             <style jsx>{`
                 @keyframes float-up {
                     0% {
-                        transform: translateY(100vh) rotate(0deg);
+                        transform: translateY(50vh) translateZ(0);
                         opacity: 0;
                     }
-                    10% {
-                        opacity: ${baseOpacity};
+                    15% {
+                        opacity: ${baseOpacity * 0.8};
                     }
-                    90% {
-                        opacity: ${baseOpacity};
+                    85% {
+                        opacity: ${baseOpacity * 0.8};
                     }
                     100% {
-                        transform: translateY(-100px) rotate(360deg);
+                        transform: translateY(-50px) translateZ(0);
                         opacity: 0;
-                    }
-                }
-
-                @keyframes twinkle {
-                    0%, 100% {
-                        opacity: ${glowOpacity};
-                        transform: scale(1);
-                    }
-                    50% {
-                        opacity: ${baseOpacity};
-                        transform: scale(1.2);
                     }
                 }
 
                 @keyframes pulse-glow {
                     0%, 100% {
-                        opacity: ${glowOpacity * 0.5};
+                        opacity: ${glowOpacity * 0.4};
                     }
                     50% {
-                        opacity: ${glowOpacity};
+                        opacity: ${glowOpacity * 0.7};
                     }
                 }
 
                 @keyframes mobile-float {
                     0%, 100% {
-                        transform: translateY(0) scale(1);
+                        transform: translateY(0) translateZ(0);
                     }
                     50% {
-                        transform: translateY(-10px) scale(1.1);
+                        transform: translateY(-8px) translateZ(0);
                     }
                 }
 
                 .particle {
                     position: absolute;
                     pointer-events: none;
+                    will-change: transform, opacity;
+                    transform: translateZ(0);
                     animation: ${isMobile ? 'mobile-float' : 'float-up'} var(--duration) ease-in-out infinite;
                     animation-delay: var(--delay);
                 }
@@ -224,35 +213,32 @@ export default function InteractionEffects({
                     position: absolute;
                     inset: 0;
                     pointer-events: none;
-                    animation: pulse-glow 3s ease-in-out infinite;
+                    will-change: opacity;
+                    animation: pulse-glow 5s ease-in-out infinite;
                 }
 
-                /* 统一使用主题颜色 */
+                /* 统一使用主题颜色 - 简化渐变 */
                 .kiss-glow,
                 .hug-glow,
                 .goodnight-glow {
-                    background: ${isMobile
-                    ? `linear-gradient(135deg, ${themeConfig.primary}${glowOpacity}) 0%, ${themeConfig.secondary}${glowOpacity * 0.5}) 30%, transparent 60%)`
-                    : `radial-gradient(ellipse at 50% 50%, ${themeConfig.primary}${glowOpacity}) 0%, ${themeConfig.secondary}${glowOpacity * 0.5}) 30%, transparent 60%)`
-                };
+                    background: radial-gradient(ellipse at 50% 50%, ${themeConfig.primary}${glowOpacity * 0.6}) 0%, transparent 70%);
                 }
 
-                /* 移动端边框发光效果 - 使用主题颜色 */
+                /* 移动端边框发光效果 - 简化 */
                 @media (max-width: 768px) {
                     .mobile-border-glow {
                         position: absolute;
-                        inset: -4px;
+                        inset: -2px;
                         border-radius: inherit;
                         pointer-events: none;
-                        animation: pulse-glow 2s ease-in-out infinite;
+                        will-change: opacity;
+                        animation: pulse-glow 4s ease-in-out infinite;
                     }
 
                     .kiss-border,
                     .hug-border,
                     .goodnight-border {
-                        box-shadow: inset 0 0 30px ${themeConfig.primary}${glowOpacity}),
-                                    0 0 25px ${themeConfig.primary}${glowOpacity * 0.7}),
-                                    0 0 50px ${themeConfig.secondary}${glowOpacity * 0.3});
+                        box-shadow: 0 0 20px ${themeConfig.primary}${glowOpacity * 0.5});
                     }
                 }
             `}</style>
