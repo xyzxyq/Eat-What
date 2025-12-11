@@ -10,24 +10,36 @@ interface SwipeablePanelProps {
 export default function SwipeablePanel({ leftPanel, rightPanel }: SwipeablePanelProps) {
     const [activeIndex, setActiveIndex] = useState(0) // 0 = 日记, 1 = 互动
     const [translateX, setTranslateX] = useState(0)
-    const [isDragging, setIsDragging] = useState(false)
+    const [isSwiping, setIsSwiping] = useState(false) // 是否正在滑动（区分点击和滑动）
 
     const touchStartX = useRef(0)
     const touchCurrentX = useRef(0)
+    const touchStartTime = useRef(0)
     const containerRef = useRef<HTMLDivElement>(null)
 
     const SWIPE_THRESHOLD = 50 // 滑动阈值
+    const SWIPE_START_THRESHOLD = 10 // 开始识别为滑动的最小距离
 
     const handleTouchStart = (e: React.TouchEvent) => {
         touchStartX.current = e.touches[0].clientX
         touchCurrentX.current = e.touches[0].clientX
-        setIsDragging(true)
+        touchStartTime.current = Date.now()
+        // 不立即设置 isSwiping，等 move 时判断
     }
 
     const handleTouchMove = (e: React.TouchEvent) => {
-        if (!isDragging) return
         touchCurrentX.current = e.touches[0].clientX
         const diff = touchCurrentX.current - touchStartX.current
+
+        // 只有移动超过阈值才开始处理滑动（区分点击和滑动）
+        if (!isSwiping && Math.abs(diff) < SWIPE_START_THRESHOLD) {
+            return
+        }
+
+        // 开始滑动
+        if (!isSwiping) {
+            setIsSwiping(true)
+        }
 
         // 限制滑动范围
         if (activeIndex === 0 && diff > 0) {
@@ -42,10 +54,10 @@ export default function SwipeablePanel({ leftPanel, rightPanel }: SwipeablePanel
     }
 
     const handleTouchEnd = () => {
-        setIsDragging(false)
         const diff = touchCurrentX.current - touchStartX.current
 
-        if (Math.abs(diff) > SWIPE_THRESHOLD) {
+        // 只有在真正滑动时才处理面板切换
+        if (isSwiping && Math.abs(diff) > SWIPE_THRESHOLD) {
             if (diff > 0 && activeIndex === 1) {
                 // 向右滑动，切换到左边面板
                 setActiveIndex(0)
@@ -55,6 +67,7 @@ export default function SwipeablePanel({ leftPanel, rightPanel }: SwipeablePanel
             }
         }
 
+        setIsSwiping(false)
         setTranslateX(0)
     }
 
@@ -99,7 +112,7 @@ export default function SwipeablePanel({ leftPanel, rightPanel }: SwipeablePanel
                 onTouchEnd={handleTouchEnd}
             >
                 <div
-                    className={`flex ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
+                    className={`flex ${isSwiping ? '' : 'transition-transform duration-300 ease-out'}`}
                     style={{
                         transform: `translateX(calc(-${activeIndex * 100}% + ${translateX}px))`
                     }}

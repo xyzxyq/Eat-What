@@ -38,7 +38,7 @@ export default function LoginForm() {
                 // 检查是否需要绑定码
                 if (data.requireInviteCode) {
                     setRequireInviteCode(true)
-                    setError('此空间已有用户，请输入绑定码加入 🔐')
+                    setError('此空间已有用户，请向你的另一半索要绑定码 🔐')
                 } else {
                     setError(data.error)
                 }
@@ -54,7 +54,9 @@ export default function LoginForm() {
                 sessionStorage.setItem('temp-auth', JSON.stringify({
                     tempToken: data.tempToken,
                     hasPassword: data.hasPassword,
-                    user: data.user
+                    user: data.user,
+                    isNewSpace: data.isNewSpace || false,
+                    inviteCode: data.inviteCode || null
                 }))
 
                 // 跳转到密码页面
@@ -132,6 +134,15 @@ export default function LoginForm() {
                 {/* Invite Code Input - 仅当需要时显示 */}
                 {requireInviteCode && (
                     <div className="space-y-2 animate-fade-in-up">
+                        <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg mb-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-lg">💡</span>
+                                <span className="font-medium text-purple-700">如何获取绑定码？</span>
+                            </div>
+                            <p className="text-sm text-purple-600">
+                                你的另一半在创建空间时获得了6位绑定码。请向 TA 索要这个码，或者让 TA 在设置页面的「邀请伴侣」中查看。
+                            </p>
+                        </div>
                         <label className="flex items-center gap-2 text-sm font-medium text-[var(--hf-text)]">
                             <span>🔐</span>
                             <span className="mono">Invite Code</span>
@@ -148,7 +159,7 @@ export default function LoginForm() {
                             autoFocus
                         />
                         <p className="text-xs text-[var(--hf-text-muted)]">
-                            🔗 请向你的另一半索要绑定码
+                            🔗 绑定码由先创建空间的一方提供
                         </p>
                     </div>
                 )}

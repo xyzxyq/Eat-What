@@ -25,7 +25,8 @@ export default function FoodVotePanel({ isOpen, onClose, onResult }: FoodVotePan
     const [session, setSession] = useState<VoteSession | null>(null)
     const [isUserA, setIsUserA] = useState(false)
     const [selectedFoods, setSelectedFoods] = useState<string[]>([])
-    const [loading, setLoading] = useState(false)
+    const [fetchingSession, setFetchingSession] = useState(false)  // 用于获取会话
+    const [submitting, setSubmitting] = useState(false)  // 用于提交投票
     const [submitted, setSubmitted] = useState(false)
     const [error, setError] = useState('')
     const [step, setStep] = useState<'select' | 'waiting' | 'result'>('select')
@@ -43,7 +44,7 @@ export default function FoodVotePanel({ isOpen, onClose, onResult }: FoodVotePan
     // 获取或创建投票会话
     const fetchOrCreateSession = useCallback(async () => {
         try {
-            setLoading(true)
+            setFetchingSession(true)
             setError('')
             // 先尝试获取现有会话
             let res = await fetch('/api/food/vote')
@@ -79,7 +80,7 @@ export default function FoodVotePanel({ isOpen, onClose, onResult }: FoodVotePan
             setError('无法创建投票会话，请稍后重试')
             console.error(err)
         } finally {
-            setLoading(false)
+            setFetchingSession(false)
         }
     }, [])
 
@@ -128,7 +129,7 @@ export default function FoodVotePanel({ isOpen, onClose, onResult }: FoodVotePan
         }
 
         try {
-            setLoading(true)
+            setSubmitting(true)
             const res = await fetch('/api/food/vote', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -152,7 +153,7 @@ export default function FoodVotePanel({ isOpen, onClose, onResult }: FoodVotePan
             setError('Failed to submit vote')
             console.error(err)
         } finally {
-            setLoading(false)
+            setSubmitting(false)
         }
     }
 
@@ -299,13 +300,13 @@ export default function FoodVotePanel({ isOpen, onClose, onResult }: FoodVotePan
                     {step === 'select' && (
                         <button
                             onClick={handleSubmit}
-                            disabled={loading || selectedFoods.length === 0}
-                            className={`flex-1 px-4 py-3 rounded-xl font-medium transition ${selectedFoods.length > 0
+                            disabled={submitting || selectedFoods.length === 0}
+                            className={`flex-1 px-4 py-3 rounded-xl font-medium transition ${selectedFoods.length > 0 && !submitting
                                 ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)] hover:opacity-90'
                                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                         >
-                            {loading ? '提交中...' : `确认选择 (${selectedFoods.length})`}
+                            {submitting ? '提交中...' : `确认选择 (${selectedFoods.length})`}
                         </button>
                     )}
 

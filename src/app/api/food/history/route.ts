@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // GET: 获取食物选择历史
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     try {
         const cookieStore = await cookies()
         const token = cookieStore.get('auth-token')?.value
@@ -83,6 +83,57 @@ export async function GET(request: Request) {
         })
     } catch (error) {
         console.error('Get food history error:', error)
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+}
+
+// DELETE: 删除历史记录
+export async function DELETE(request: NextRequest) {
+    try {
+        const cookieStore = await cookies()
+        const token = cookieStore.get('auth-token')?.value
+
+        if (!token) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        }
+
+        const payload = await verifyToken(token)
+        if (!payload) {
+            return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+        }
+
+        const { searchParams } = new URL(request.url)
+        const choiceId = searchParams.get('id')
+
+        if (!choiceId) {
+            return NextResponse.json({ error: 'Choice ID is required' }, { status: 400 })
+        }
+
+        // 获取用户的空间ID
+        const user = await prisma.user.findUnique({
+            where: { id: payload.userId as string },
+            select: { coupleSpaceId: true },
+        })
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 })
+        }
+
+        // 删除记录（确保属于用户的空间）
+        const deleted = await prisma.foodChoice.deleteMany({
+            where: {
+                id: choiceId,
+                coupleSpaceId: user.coupleSpaceId,
+            },
+        })
+
+        if (deleted.count === 0) {
+            return NextResponse.json({ error: 'Record not found' }, { status: 404 })
+        }
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Delete food history error:', error)
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
 }

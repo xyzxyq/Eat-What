@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // GET: 获取食物选项列表
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
         const cookieStore = await cookies()
         const token = cookieStore.get('auth-token')?.value
@@ -17,6 +17,9 @@ export async function GET() {
         if (!payload) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
         }
+
+        const { searchParams } = new URL(request.url)
+        const libraryId = searchParams.get('libraryId')
 
         // 获取用户的空间ID
         const user = await prisma.user.findUnique({
@@ -33,6 +36,7 @@ export async function GET() {
             where: {
                 coupleSpaceId: user.coupleSpaceId,
                 isActive: true,
+                ...(libraryId && { libraryId }),
             },
             orderBy: { createdAt: 'desc' },
         })
@@ -60,7 +64,7 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json()
-        const { name, emoji, category, subCategory, tags } = body
+        const { name, emoji, category, subCategory, tags, libraryId } = body
 
         if (!name || !category) {
             return NextResponse.json(
@@ -79,6 +83,31 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
+        // 如果没有指定库，尝试获取或创建默认库
+        let targetLibraryId = libraryId
+        if (!targetLibraryId) {
+            let defaultLibrary = await prisma.foodLibrary.findFirst({
+                where: {
+                    coupleSpaceId: user.coupleSpaceId,
+                    isDefault: true,
+                },
+            })
+
+            if (!defaultLibrary) {
+                defaultLibrary = await prisma.foodLibrary.create({
+                    data: {
+                        name: '我的收藏',
+                        emoji: '⭐',
+                        description: '默认的美食收藏库',
+                        isDefault: true,
+                        coupleSpaceId: user.coupleSpaceId,
+                        createdById: payload.userId as string,
+                    },
+                })
+            }
+            targetLibraryId = defaultLibrary.id
+        }
+
         // 创建食物选项
         const option = await prisma.foodOption.create({
             data: {
@@ -90,6 +119,7 @@ export async function POST(request: Request) {
                 isPreset: false,
                 createdById: payload.userId as string,
                 coupleSpaceId: user.coupleSpaceId,
+                libraryId: targetLibraryId,
             },
         })
 

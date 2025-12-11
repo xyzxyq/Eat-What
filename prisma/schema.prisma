@@ -18,6 +18,7 @@ model CoupleSpace {
   anniversaries     Anniversary[]
   dailyInteractions DailyInteraction[]
   foodChoices       FoodChoice[]
+  foodLibraries     FoodLibrary[]
   foodOptions       FoodOption[]
   foodVoteSessions  FoodVoteSession[]
   missYouRecords    MissYou[]
@@ -234,22 +235,41 @@ model MissYou {
   @@index([coupleSpaceId, date])
 }
 
-model FoodOption {
-  id            String      @id @default(uuid())
+model FoodLibrary {
+  id            String       @id @default(uuid())
   name          String
-  emoji         String      @default("🍽️")
+  emoji         String       @default("📂")
+  description   String?
+  coupleSpaceId String
+  createdById   String?
+  isDefault     Boolean      @default(false)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  coupleSpace   CoupleSpace  @relation(fields: [coupleSpaceId], references: [id])
+  foodOptions   FoodOption[]
+
+  @@index([coupleSpaceId])
+}
+
+model FoodOption {
+  id            String       @id @default(uuid())
+  name          String
+  emoji         String       @default("🍽️")
   category      String
   subCategory   String?
   tags          String[]
-  isPreset      Boolean     @default(false)
-  isActive      Boolean     @default(true)
+  isPreset      Boolean      @default(false)
+  isActive      Boolean      @default(true)
   coupleSpaceId String
   createdById   String?
-  createdAt     DateTime    @default(now())
-  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  libraryId     String?
+  createdAt     DateTime     @default(now())
+  coupleSpace   CoupleSpace  @relation(fields: [coupleSpaceId], references: [id])
+  library       FoodLibrary? @relation(fields: [libraryId], references: [id], onDelete: SetNull)
 
   @@index([coupleSpaceId, isActive])
   @@index([coupleSpaceId, category])
+  @@index([libraryId])
 }
 
 model FoodChoice {

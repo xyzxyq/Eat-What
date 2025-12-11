@@ -11,6 +11,8 @@ interface TempAuthData {
         avatarEmoji: string
         avatarUrl?: string | null
     }
+    isNewSpace?: boolean
+    inviteCode?: string | null
 }
 
 export default function PasswordPage() {
@@ -21,6 +23,7 @@ export default function PasswordPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [showPassword, setShowPassword] = useState(false)
+    const [copied, setCopied] = useState(false)
 
     useEffect(() => {
         // 从 sessionStorage 获取临时认证数据
@@ -148,6 +151,63 @@ export default function PasswordPage() {
                             {isSetupMode ? '请设置您的登录密码' : '请输入您的登录密码'}
                         </p>
                     </div>
+
+                    {/* Invite Code Card - Only for new space creators */}
+                    {authData.isNewSpace && authData.inviteCode && (
+                        <div className="hf-card mb-6 bg-gradient-to-br from-pink-50 to-purple-50 border-purple-200">
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="text-xl">💌</span>
+                                <span className="font-semibold text-[var(--hf-text)]">邀请 TA 加入</span>
+                            </div>
+                            <p className="text-sm text-[var(--hf-text-muted)] mb-4">
+                                请将下方<strong>绑定码</strong>和<strong>口令</strong>分享给你的另一半，TA 可以用来加入你们的专属空间 💕
+                            </p>
+
+                            {/* 绑定码显示 */}
+                            <div className="bg-white rounded-xl p-4 border border-purple-200 mb-4">
+                                <p className="text-xs text-[var(--hf-text-muted)] mb-2 text-center">绑定码</p>
+                                <div className="text-center">
+                                    <span className="text-3xl font-mono font-bold tracking-[0.3em] text-purple-600">
+                                        {authData.inviteCode}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* 复制按钮 */}
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    try {
+                                        await navigator.clipboard.writeText(authData.inviteCode!)
+                                        setCopied(true)
+                                        setTimeout(() => setCopied(false), 2000)
+                                    } catch {
+                                        console.error('Failed to copy')
+                                    }
+                                }}
+                                className={`w-full py-3 rounded-xl font-medium transition flex items-center justify-center gap-2 ${copied
+                                        ? 'bg-green-100 text-green-600'
+                                        : 'bg-purple-500 text-white hover:bg-purple-600'
+                                    }`}
+                            >
+                                {copied ? (
+                                    <>
+                                        <span>✓</span>
+                                        <span>已复制到剪贴板</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>📋</span>
+                                        <span>复制绑定码</span>
+                                    </>
+                                )}
+                            </button>
+
+                            <p className="text-xs text-[var(--hf-text-muted)] text-center mt-3">
+                                ⚠️ 请通过私密渠道分享口令和绑定码
+                            </p>
+                        </div>
+                    )}
 
                     {/* Password Form */}
                     <div className="hf-card">

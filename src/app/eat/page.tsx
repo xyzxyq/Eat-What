@@ -7,6 +7,8 @@ import FoodWheel from '@/components/FoodWheel'
 import AddFoodModal from '@/components/AddFoodModal'
 import QuickImportModal from '@/components/QuickImportModal'
 import FoodVotePanel from '@/components/FoodVotePanel'
+import EatLoadingSkeleton from '@/components/EatLoadingSkeleton'
+import FoodLibraryManager from '@/components/FoodLibraryManager'
 import { FOOD_CATEGORIES, PRESET_FOODS, FOOD_TAGS, getTagsByGroup, type PresetFood } from '@/lib/food-categories'
 
 interface FoodOption {
@@ -49,6 +51,11 @@ export default function EatWhatPage() {
     const [currentTheme, setCurrentTheme] = useState('yellow')
     const [activeTab, setActiveTab] = useState<'spin' | 'manage'>('spin')
     const [dataSource, setDataSource] = useState<'preset' | 'custom' | 'all'>('preset')
+    const [showLibraryManager, setShowLibraryManager] = useState(false)
+    const [selectedLibraryId, setSelectedLibraryId] = useState<string | null>(null)
+    const [editingHistory, setEditingHistory] = useState<FoodChoice | null>(null)
+    const [editRating, setEditRating] = useState(0)
+    const [editNote, setEditNote] = useState('')
 
     // 获取食物选项
     const fetchOptions = useCallback(async () => {
@@ -156,31 +163,38 @@ export default function EatWhatPage() {
         const randomIndex = Math.floor(Math.random() * availableFoods.length)
         const selected = availableFoods[randomIndex]
 
-        // 模拟转盘动画时间
-        setTimeout(async () => {
+        // 模拟转盘动画时间 - 不再自动保存，等待用户确认
+        setTimeout(() => {
             setSpinResult(selected)
             setIsSpinning(false)
             setShowResult(true)
-
-            // 保存选择记录
-            try {
-                await fetch('/api/food/spin', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        foodName: selected.name,
-                        foodEmoji: selected.emoji,
-                        category: selected.category,
-                    }),
-                })
-                fetchHistory()
-            } catch (error) {
-                console.error('Failed to save choice:', error)
-            }
         }, 3000)
     }
 
-    // 重新选择
+    // 用户确认选择 - 只有点击"就这个！"时才保存到历史
+    const handleConfirmChoice = async () => {
+        if (!spinResult) return
+
+        try {
+            await fetch('/api/food/spin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    foodName: spinResult.name,
+                    foodEmoji: spinResult.emoji,
+                    category: spinResult.category,
+                }),
+            })
+            fetchHistory()
+            // 显示确认成功
+            setShowResult(false)
+            setSpinResult(null)
+        } catch (error) {
+            console.error('Failed to save choice:', error)
+        }
+    }
+
+    // 重新选择 - 不保存当前结果
     const handleRespin = () => {
         setShowResult(false)
         setSpinResult(null)
@@ -224,15 +238,49 @@ export default function EatWhatPage() {
         }
     }
 
+    // 删除历史记录
+    const handleDeleteHistory = async (id: string) => {
+        try {
+            const res = await fetch(`/api/food/history?id=${id}`, {
+                method: 'DELETE',
+            })
+            if (res.ok) {
+                setHistory(prev => prev.filter(h => h.id !== id))
+            }
+        } catch (error) {
+            console.error('Failed to delete history:', error)
+        }
+    }
+
+    // 更新历史记录评分和备注
+    const handleUpdateHistory = async () => {
+        if (!editingHistory) return
+        try {
+            const res = await fetch('/api/food/rating', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    choiceId: editingHistory.id,
+                    rating: editRating,
+                    note: editNote,
+                }),
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setHistory(prev => prev.map(h =>
+                    h.id === editingHistory.id
+                        ? { ...h, userARating: data.choice.userARating, userBRating: data.choice.userBRating, note: data.choice.note }
+                        : h
+                ))
+                setEditingHistory(null)
+            }
+        } catch (error) {
+            console.error('Failed to update history:', error)
+        }
+    }
+
     if (loading) {
-        return (
-            <div className="min-h-screen bg-[var(--hf-bg)] flex items-center justify-center">
-                <div className="text-center">
-                    <div className="spinner mx-auto mb-4" style={{ width: 48, height: 48 }}></div>
-                    <p className="text-[var(--hf-text-muted)] mono">Loading...</p>
-                </div>
-            </div>
-        )
+        return <EatLoadingSkeleton />
     }
 
     const availableFoods = getAvailableFoods()
@@ -291,10 +339,10 @@ export default function EatWhatPage() {
                                     🔄 换一个
                                 </button>
                                 <button
-                                    onClick={() => setShowResult(false)}
+                                    onClick={handleConfirmChoice}
                                     className="hf-button"
                                 >
-                                    ✅ 就这个了！
+                                    ✅ 就这个！记一下
                                 </button>
                             </>
                         ) : (
@@ -328,40 +376,68 @@ export default function EatWhatPage() {
 
                     {/* 数据源选择 */}
                     <div className="mb-4">
-                        <p className="text-sm text-[var(--hf-text-muted)] mb-2">美食库</p>
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-sm text-[var(--hf-text-muted)]">美食库</p>
+                            <button
+                                onClick={() => setShowLibraryManager(true)}
+                                className="text-xs text-blue-500 hover:text-blue-600 flex items-center gap-1"
+                            >
+                                📚 管理库
+                            </button>
+                        </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setDataSource('preset')}
+                                onClick={() => {
+                                    setDataSource('preset')
+                                    setSelectedLibraryId(null)
+                                }}
                                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition touch-feedback ${dataSource === 'preset'
-                                        ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
-                                        : 'bg-gray-100 text-[var(--hf-text-muted)] hover:bg-gray-200'
+                                    ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
+                                    : 'bg-gray-100 text-[var(--hf-text-muted)] hover:bg-gray-200'
                                     }`}
                             >
                                 📦 预设库 ({PRESET_FOODS.length})
                             </button>
                             <button
-                                onClick={() => setDataSource('custom')}
+                                onClick={() => {
+                                    setDataSource('custom')
+                                    setSelectedLibraryId(null)
+                                }}
                                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition touch-feedback ${dataSource === 'custom'
-                                        ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
-                                        : 'bg-gray-100 text-[var(--hf-text-muted)] hover:bg-gray-200'
+                                    ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
+                                    : 'bg-gray-100 text-[var(--hf-text-muted)] hover:bg-gray-200'
                                     }`}
                             >
                                 ✨ 自定义 ({customFoods.length})
                             </button>
                             <button
-                                onClick={() => setDataSource('all')}
+                                onClick={() => {
+                                    setDataSource('all')
+                                    setSelectedLibraryId(null)
+                                }}
                                 className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition touch-feedback ${dataSource === 'all'
-                                        ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
-                                        : 'bg-gray-100 text-[var(--hf-text-muted)] hover:bg-gray-200'
+                                    ? 'bg-[var(--hf-yellow)] text-[var(--hf-text)]'
+                                    : 'bg-gray-100 text-[var(--hf-text-muted)] hover:bg-gray-200'
                                     }`}
                             >
                                 🌟 全部
                             </button>
                         </div>
                         {dataSource === 'custom' && customFoods.length === 0 && (
-                            <p className="text-xs text-orange-500 mt-2">
-                                💡 自定义库为空，点击右下角 + 按钮添加，或使用 ⚡ 快速导入
-                            </p>
+                            <div className="mt-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
+                                <p className="text-sm text-orange-700 mb-2">
+                                    💡 自定义库为空
+                                </p>
+                                <p className="text-xs text-orange-600 mb-2">
+                                    先创建一个美食库，然后在库里添加你喜欢的食物：
+                                </p>
+                                <button
+                                    onClick={() => setShowLibraryManager(true)}
+                                    className="w-full py-2 bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg text-sm font-medium transition"
+                                >
+                                    📚 创建美食库
+                                </button>
+                            </div>
                         )}
                     </div>
 
@@ -492,11 +568,11 @@ export default function EatWhatPage() {
                             {history.slice(0, 5).map(choice => (
                                 <div
                                     key={choice.id}
-                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg group"
                                 >
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
                                         <span className="text-2xl">{choice.foodEmoji}</span>
-                                        <div>
+                                        <div className="flex-1 min-w-0">
                                             <p className="font-medium text-[var(--hf-text)]">{choice.foodName}</p>
                                             <p className="text-xs text-[var(--hf-text-muted)]">
                                                 {new Date(choice.chosenDate).toLocaleDateString('zh-CN', {
@@ -504,14 +580,37 @@ export default function EatWhatPage() {
                                                     day: 'numeric',
                                                     weekday: 'short',
                                                 })}
+                                                {choice.note && (
+                                                    <span className="ml-2 text-gray-400">· {choice.note}</span>
+                                                )}
                                             </p>
                                         </div>
                                     </div>
-                                    {(choice.userARating || choice.userBRating) && (
-                                        <div className="text-sm text-[var(--hf-yellow)]">
-                                            {'⭐'.repeat(Math.round(((choice.userARating || 0) + (choice.userBRating || 0)) / 2))}
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-1">
+                                        {(choice.userARating || choice.userBRating) && (
+                                            <div className="text-sm text-[var(--hf-yellow)] mr-1">
+                                                {'⭐'.repeat(Math.max(choice.userARating || 0, choice.userBRating || 0))}
+                                            </div>
+                                        )}
+                                        <button
+                                            onClick={() => {
+                                                setEditingHistory(choice)
+                                                setEditRating(choice.userARating || choice.userBRating || 0)
+                                                setEditNote(choice.note || '')
+                                            }}
+                                            className="p-1.5 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition opacity-0 group-hover:opacity-100"
+                                            title="编辑"
+                                        >
+                                            ✏️
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteHistory(choice.id)}
+                                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition opacity-0 group-hover:opacity-100"
+                                            title="删除记录"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -569,6 +668,88 @@ export default function EatWhatPage() {
                     }
                 }}
             />
+
+            <FoodLibraryManager
+                isOpen={showLibraryManager}
+                onClose={() => setShowLibraryManager(false)}
+                onLibrarySelect={(libraryId) => {
+                    if (libraryId) {
+                        setSelectedLibraryId(libraryId)
+                        setDataSource('custom')
+                    }
+                }}
+                onFoodsUpdated={fetchOptions}
+            />
+
+            {/* 编辑历史记录弹窗 */}
+            {editingHistory && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                    <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+                        <h3 className="text-lg font-bold text-[var(--hf-text)] mb-4 flex items-center gap-2">
+                            <span>{editingHistory.foodEmoji}</span>
+                            <span>{editingHistory.foodName}</span>
+                        </h3>
+
+                        {/* 评分 */}
+                        <div className="mb-4">
+                            <p className="text-sm text-[var(--hf-text-muted)] mb-2">评分</p>
+                            <div className="flex gap-2">
+                                {[1, 2, 3, 4, 5].map(star => (
+                                    <button
+                                        key={star}
+                                        type="button"
+                                        onClick={() => setEditRating(star)}
+                                        className={`w-10 h-10 text-xl rounded-lg transition ${editRating >= star
+                                            ? 'bg-[var(--hf-yellow)]'
+                                            : 'bg-gray-100 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        ⭐
+                                    </button>
+                                ))}
+                                {editRating > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setEditRating(0)}
+                                        className="w-10 h-10 text-sm rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-500"
+                                    >
+                                        清除
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 备注 */}
+                        <div className="mb-4">
+                            <p className="text-sm text-[var(--hf-text-muted)] mb-2">备注</p>
+                            <input
+                                type="text"
+                                value={editNote}
+                                onChange={(e) => setEditNote(e.target.value)}
+                                placeholder="例如：味道不错、下次再来"
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-[var(--hf-yellow)]"
+                            />
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setEditingHistory(null)}
+                                className="flex-1 py-3 border border-gray-200 rounded-xl text-[var(--hf-text-muted)] hover:bg-gray-50"
+                            >
+                                取消
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleUpdateHistory}
+                                className="flex-1 py-3 bg-[var(--hf-yellow)] rounded-xl font-medium text-[var(--hf-text)] hover:opacity-90 transition"
+                            >
+                                保存
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* 双人投票入口 */}
             <button
