@@ -4,7 +4,7 @@ import { getSessionFromRequest } from '@/lib/auth'
 
 // GET - Fetch comments for a wish with nested structure
 export async function GET(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
@@ -98,7 +98,7 @@ export async function GET(
 
 // POST - Add a comment
 export async function POST(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
