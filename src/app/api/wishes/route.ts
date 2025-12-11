@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionFromRequest } from '@/lib/auth'
 import { sendPartnerNotification } from '@/lib/email'
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST - Create a new wish
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
         const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId || !session?.userId) {

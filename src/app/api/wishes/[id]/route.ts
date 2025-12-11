@@ -4,7 +4,7 @@ import { getSessionFromRequest } from '@/lib/auth'
 
 // PUT - Update wish content or completion status
 export async function PUT(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
@@ -89,7 +89,7 @@ export async function PUT(
 
 // DELETE - Delete a wish
 export async function DELETE(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {

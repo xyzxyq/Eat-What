@@ -4,7 +4,7 @@ import { getSessionFromRequest } from '@/lib/auth'
 
 // POST - Increment vote count (unlimited)
 export async function POST(
-    request: Request,
+    request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
