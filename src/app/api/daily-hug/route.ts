@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST: 记录抱抱
-export async function POST() {
+export async function POST(request: NextRequest) {
     try {
         const session = await getSessionFromRequest(request)
         if (!session) {
