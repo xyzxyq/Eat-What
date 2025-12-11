@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 import { generateVerificationCode, sendVerificationEmail } from '@/lib/email'
 
 // POST - 发起更换邮箱请求（发送验证码到新邮箱）
 export async function POST(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 // PUT - 验证并更换邮箱
 export async function PUT(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

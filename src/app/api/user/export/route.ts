@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 
 // GET - 导出用户数据
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

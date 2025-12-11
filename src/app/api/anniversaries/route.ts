@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 
 // GET - 获取所有纪念日
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -25,7 +25,7 @@ export async function GET() {
 // POST - 创建新纪念日
 export async function POST(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId || !session?.userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 // PUT - 更新纪念日
 export async function PUT(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -99,7 +99,7 @@ export async function PUT(request: NextRequest) {
 // DELETE - 删除纪念日
 export async function DELETE(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 import { sendPartnerNotification } from '@/lib/email'
 
 // 获取日记的评论
 export async function GET(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 // 添加评论
 export async function POST(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
 // 删除评论
 export async function DELETE(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

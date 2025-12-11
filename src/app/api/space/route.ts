@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 
 // 获取情侣空间信息
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -29,7 +29,7 @@ export async function GET() {
 // 更新空间设置
 export async function PUT(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

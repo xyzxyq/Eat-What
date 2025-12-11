@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 
 // PUT - 编辑日记内容
 export async function PUT(
@@ -8,7 +8,7 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -61,7 +61,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

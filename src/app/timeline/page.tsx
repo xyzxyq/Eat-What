@@ -213,6 +213,14 @@ export default function TimelinePage() {
                         </button>
 
                         <button
+                            onClick={() => router.push('/eat')}
+                            className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 hover:shadow-md transition-all flex items-center gap-1 flex-shrink-0 touch-feedback"
+                        >
+                            <span className="text-sm sm:text-base">🍽️</span>
+                            <span className="text-xs sm:text-sm font-medium text-[var(--hf-text)]">吃啥</span>
+                        </button>
+
+                        <button
                             onClick={() => setShowSettings(true)}
                             className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gray-50 border border-gray-200 hover:bg-gray-100 transition-all text-xs sm:text-sm text-[var(--hf-text-muted)] flex items-center gap-1 flex-shrink-0 touch-feedback"
                         >

@@ -7,71 +7,73 @@ datasource db {
 }
 
 model CoupleSpace {
-  id             String        @id @default(uuid())
-  passphraseHash String        @unique
-  inviteCode     String?       @unique  // 6位邀请绑定码，可空用于迁移
-  startDate      DateTime?
-  theme          String        @default("yellow")
-  effectIntensity String       @default("subtle")   // 效果强度: subtle | obvious
-  effectArea      String       @default("local")    // 效果范围: local | fullpage
-  createdAt      DateTime      @default(now())
-  users          User[]
-  moments        Moment[]
-  wishes         Wish[]
-  anniversaries  Anniversary[]
-  secretWishes   SecretWish[]
-  revealRequests WishRevealRequest[]
+  id                String              @id @default(uuid())
+  passphraseHash    String              @unique
+  inviteCode        String?             @unique
+  startDate         DateTime?
+  theme             String              @default("yellow")
+  effectIntensity   String              @default("subtle")
+  effectArea        String              @default("local")
+  createdAt         DateTime            @default(now())
+  anniversaries     Anniversary[]
   dailyInteractions DailyInteraction[]
+  foodChoices       FoodChoice[]
+  foodOptions       FoodOption[]
+  foodVoteSessions  FoodVoteSession[]
   missYouRecords    MissYou[]
+  moments           Moment[]
+  secretWishes      SecretWish[]
+  users             User[]
+  wishes            Wish[]
+  revealRequests    WishRevealRequest[]
 }
 
 model User {
-  id                  String              @id @default(uuid())
-  nickname            String
-  displayName         String?
-  passwordHash        String?             // 用户密码哈希，可空以兼容老用户
-  gender              String?
-  avatarEmoji         String              @default("💕")
-  avatarUrl           String?
-  status              String              @default("")
-  isProfileComplete   Boolean             @default(false)
-  email               String?             @unique  // 邮箱地址，唯一约束
-  isEmailVerified     Boolean             @default(false)  // 邮箱是否已验证
-  // 通知设置（默认关闭）
-  notifyOnMoment            Boolean             @default(false)  // 伴侣发日记时通知
-  notifyOnComment           Boolean             @default(false)  // 伴侣评论时通知
-  notifyOnWish              Boolean             @default(false)  // 伴侣发心愿时通知
-  notifyOnSecretWishRequest Boolean             @default(true)   // 伴侣请求查看秘密心愿时通知
-  notifyOnSecretWishResponse Boolean            @default(true)   // 伴侣同意/拒绝查看请求时通知
-  coupleSpaceId       String
-  createdAt           DateTime            @default(now())
-  coupleSpace         CoupleSpace         @relation(fields: [coupleSpaceId], references: [id])
-  moments             Moment[]
-  comments            Comment[]
-  reactions           Reaction[]
-  wishesCreated       Wish[]              @relation("WishCreator")
-  wishesEdited        Wish[]              @relation("WishEditor")
-  wishVotes           WishVote[]
-  wishComments        WishComment[]
-  emailVerifications  EmailVerification[]
-  secretWishes        SecretWish[]
-  revealRequestsSent  WishRevealRequest[] @relation("RevealRequester")
-  revealRequestsReceived WishRevealRequest[] @relation("RevealTarget")
-  dailyInteractions   DailyInteraction[]
-  missYouRecords       MissYou[]
-  
+  id                         String              @id @default(uuid())
+  nickname                   String
+  displayName                String?
+  passwordHash               String?
+  gender                     String?
+  avatarEmoji                String              @default("💕")
+  avatarUrl                  String?
+  status                     String              @default("")
+  isProfileComplete          Boolean             @default(false)
+  email                      String?             @unique
+  isEmailVerified            Boolean             @default(false)
+  notifyOnMoment             Boolean             @default(false)
+  notifyOnComment            Boolean             @default(false)
+  notifyOnWish               Boolean             @default(false)
+  notifyOnSecretWishRequest  Boolean             @default(true)
+  notifyOnSecretWishResponse Boolean             @default(true)
+  coupleSpaceId              String
+  createdAt                  DateTime            @default(now())
+  comments                   Comment[]
+  dailyInteractions          DailyInteraction[]
+  emailVerifications         EmailVerification[]
+  missYouRecords             MissYou[]
+  moments                    Moment[]
+  reactions                  Reaction[]
+  secretWishes               SecretWish[]
+  coupleSpace                CoupleSpace         @relation(fields: [coupleSpaceId], references: [id])
+  wishesCreated              Wish[]              @relation("WishCreator")
+  wishesEdited               Wish[]              @relation("WishEditor")
+  wishComments               WishComment[]
+  revealRequestsSent         WishRevealRequest[] @relation("RevealRequester")
+  revealRequestsReceived     WishRevealRequest[] @relation("RevealTarget")
+  wishVotes                  WishVote[]
+
   @@unique([coupleSpaceId, nickname])
 }
 
 model EmailVerification {
   id        String   @id @default(uuid())
   email     String
-  code      String   // 6位数字验证码
+  code      String
   userId    String
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([email, code])
 }
 
@@ -80,16 +82,16 @@ model Moment {
   content       String
   mediaUrl      String?
   mediaType     String      @default("none")
-  likeCount     Int         @default(0)  // 点赞次数（可多次点击）
+  likeCount     Int         @default(0)
   userId        String
   coupleSpaceId String
   momentDate    DateTime
   createdAt     DateTime    @default(now())
-  user          User        @relation(fields: [userId], references: [id])
-  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
   comments      Comment[]
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
   reactions     Reaction[]
-  
+
   @@unique([userId, momentDate])
 }
 
@@ -101,9 +103,9 @@ model Comment {
   parentId  String?
   createdAt DateTime  @default(now())
   moment    Moment    @relation(fields: [momentId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id])
   parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[] @relation("CommentReplies")
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model Reaction {
@@ -114,7 +116,7 @@ model Reaction {
   createdAt DateTime @default(now())
   moment    Moment   @relation(fields: [momentId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id])
-  
+
   @@unique([momentId, userId, emoji])
 }
 
@@ -130,8 +132,8 @@ model Wish {
   coupleSpace    CoupleSpace   @relation(fields: [coupleSpaceId], references: [id])
   createdBy      User          @relation("WishCreator", fields: [createdById], references: [id])
   lastEditedBy   User?         @relation("WishEditor", fields: [lastEditedById], references: [id])
-  votes          WishVote[]
   comments       WishComment[]
+  votes          WishVote[]
 }
 
 model WishVote {
@@ -141,9 +143,9 @@ model WishVote {
   count     Int      @default(1)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  wish      Wish     @relation(fields: [wishId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id])
-  
+  wish      Wish     @relation(fields: [wishId], references: [id], onDelete: Cascade)
+
   @@unique([wishId, userId])
 }
 
@@ -154,87 +156,133 @@ model WishComment {
   userId    String
   parentId  String?
   createdAt DateTime      @default(now())
-  wish      Wish          @relation(fields: [wishId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id])
   parent    WishComment?  @relation("WishCommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   WishComment[] @relation("WishCommentReplies")
+  user      User          @relation(fields: [userId], references: [id])
+  wish      Wish          @relation(fields: [wishId], references: [id], onDelete: Cascade)
 }
 
-// 期盼 - 重要日期/纪念日
 model Anniversary {
   id            String      @id @default(uuid())
-  title         String      // 标题，如"在一起"、"生日"
-  date          DateTime    // 日期
-  emoji         String      @default("💕")  // 显示图标
-  type          String      @default("countdown")  // countdown(倒计时) 或 countup(已过天数)
-  isRecurring   Boolean     @default(false)  // 是否每年重复
-  isPinned      Boolean     @default(false)  // 是否置顶优先显示
-  sortOrder     Int         @default(0)  // 自定义排序顺序
+  title         String
+  date          DateTime
+  emoji         String      @default("💕")
+  type          String      @default("countdown")
+  isRecurring   Boolean     @default(false)
+  isPinned      Boolean     @default(false)
+  sortOrder     Int         @default(0)
   coupleSpaceId String
   createdById   String
   createdAt     DateTime    @default(now())
   coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
 }
 
-// 秘密心愿 - 个人私密心愿
 model SecretWish {
-  id            String    @id @default(uuid())
-  content       String    // 心愿内容
-  emoji         String    @default("🎁")
-  isRevealed    Boolean   @default(false)  // 是否已揭示给伴侣
-  revealedAt    DateTime? // 揭示时间
-  coupleSpaceId String
-  createdById   String
-  createdAt     DateTime  @default(now())
-  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
-  createdBy     User @relation(fields: [createdById], references: [id])
+  id             String              @id @default(uuid())
+  content        String
+  emoji          String              @default("🎁")
+  isRevealed     Boolean             @default(false)
+  revealedAt     DateTime?
+  coupleSpaceId  String
+  createdById    String
+  createdAt      DateTime            @default(now())
+  coupleSpace    CoupleSpace         @relation(fields: [coupleSpaceId], references: [id])
+  createdBy      User                @relation(fields: [createdById], references: [id])
   revealRequests WishRevealRequest[]
 }
 
-// 心愿揭示请求
 model WishRevealRequest {
-  id            String    @id @default(uuid())
-  secretWishId  String?   // null表示随机请求
-  requesterId   String    // 请求者
-  targetUserId  String    // 被请求者（心愿拥有者）
-  status        String    @default("pending") // pending/approved/rejected
+  id            String      @id @default(uuid())
+  secretWishId  String?
+  requesterId   String
+  targetUserId  String
+  status        String      @default("pending")
   coupleSpaceId String
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime    @default(now())
   coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+  requester     User        @relation("RevealRequester", fields: [requesterId], references: [id])
   secretWish    SecretWish? @relation(fields: [secretWishId], references: [id], onDelete: Cascade)
-  requester     User @relation("RevealRequester", fields: [requesterId], references: [id])
-  targetUser    User @relation("RevealTarget", fields: [targetUserId], references: [id])
+  targetUser    User        @relation("RevealTarget", fields: [targetUserId], references: [id])
 }
 
-// 每日互动（亲亲/晚安打卡）
 model DailyInteraction {
   id            String      @id @default(uuid())
-  type          String      // "kiss" 或 "goodnight"
-  date          String      // 日期字符串 YYYY-MM-DD
+  type          String
+  date          String
   userId        String
   coupleSpaceId String
   createdAt     DateTime    @default(now())
-  
-  user          User        @relation(fields: [userId], references: [id])
   coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
-  
-  @@unique([type, date, userId])  // 每人每天每类型只能一次
+  user          User        @relation(fields: [userId], references: [id])
+
+  @@unique([type, date, userId])
   @@index([coupleSpaceId, type, date])
 }
 
-// 想你记录（每日点击伴侣头像累计）
 model MissYou {
   id            String      @id @default(uuid())
-  date          String      // 日期字符串 YYYY-MM-DD
-  count         Int         @default(1)  // 想你次数
-  userId        String      // 发起者（点击的人）
+  date          String
+  count         Int         @default(1)
+  userId        String
   coupleSpaceId String
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  
-  user          User        @relation(fields: [userId], references: [id])
   coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
-  
-  @@unique([date, userId])  // 每人每天只有一条记录
+  user          User        @relation(fields: [userId], references: [id])
+
+  @@unique([date, userId])
   @@index([coupleSpaceId, date])
+}
+
+model FoodOption {
+  id            String      @id @default(uuid())
+  name          String
+  emoji         String      @default("🍽️")
+  category      String
+  subCategory   String?
+  tags          String[]
+  isPreset      Boolean     @default(false)
+  isActive      Boolean     @default(true)
+  coupleSpaceId String
+  createdById   String?
+  createdAt     DateTime    @default(now())
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+
+  @@index([coupleSpaceId, isActive])
+  @@index([coupleSpaceId, category])
+}
+
+model FoodChoice {
+  id            String      @id @default(uuid())
+  foodName      String
+  foodEmoji     String      @default("🍽️")
+  category      String
+  mode          String      @default("random")
+  userARating   Int?
+  userBRating   Int?
+  note          String?
+  coupleSpaceId String
+  chooserId     String?
+  chosenDate    DateTime    @default(now())
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+
+  @@index([coupleSpaceId, chosenDate])
+}
+
+model FoodVoteSession {
+  id            String      @id @default(uuid())
+  status        String      @default("waiting")
+  userAId       String?
+  userBId       String?
+  userAChoice   String[]
+  userBChoice   String[]
+  matchedResult String[]
+  finalChoice   String?
+  coupleSpaceId String
+  createdAt     DateTime    @default(now())
+  expiresAt     DateTime
+  coupleSpace   CoupleSpace @relation(fields: [coupleSpaceId], references: [id])
+
+  @@index([coupleSpaceId, status])
+  @@index([coupleSpaceId, createdAt])
 }

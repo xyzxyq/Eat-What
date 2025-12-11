@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 import { sendPartnerNotification } from '@/lib/email'
 
 // GET - Fetch all wishes with vote counts and comments
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId || !session?.userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -81,7 +81,7 @@ export async function GET() {
 // POST - Create a new wish
 export async function POST(request: Request) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId || !session?.userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

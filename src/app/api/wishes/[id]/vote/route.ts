@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 
 // POST - Increment vote count (unlimited)
 export async function POST(
@@ -8,7 +8,7 @@ export async function POST(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId || !session?.userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // 生成6位随机绑定码
@@ -8,9 +8,9 @@ function generateInviteCode(): string {
 }
 
 // GET: 获取当前空间的绑定码
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

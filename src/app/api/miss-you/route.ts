@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 
 // 获取今日日期字符串
@@ -11,9 +11,9 @@ function getTodayString(): string {
 // GET: 获取今日想你状态
 // myCount: 我今天想伴侣多少次
 // partnerMissYou: 伴侣今天想我多少次
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -74,7 +74,7 @@ export async function GET() {
 // 意思是：我想你（伴侣）+1
 export async function POST() {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

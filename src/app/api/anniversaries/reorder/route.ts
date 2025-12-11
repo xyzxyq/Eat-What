@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 
 // PUT - 批量更新排序
 export async function PUT(request: NextRequest) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }

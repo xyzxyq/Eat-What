@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getSession } from '@/lib/auth'
+import { getSessionFromRequest } from '@/lib/auth'
 
 // PUT - Update wish content or completion status
 export async function PUT(
@@ -8,7 +8,7 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId || !session?.userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
@@ -93,7 +93,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await getSession()
+        const session = await getSessionFromRequest(request)
         if (!session?.coupleSpaceId || !session?.userId) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
