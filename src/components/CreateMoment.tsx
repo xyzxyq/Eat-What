@@ -101,14 +101,14 @@ export default function CreateMoment({ onSuccess, disabled }: CreateMomentProps)
     }
 
     return (
-        <div className="hf-card">
+        <div className="hf-card min-h-[280px] flex flex-col">
             <div className="flex items-center gap-2 mb-4 pb-4 border-b border-[var(--hf-border)]">
                 <span className="text-xl">✍️</span>
                 <h3 className="font-semibold text-[var(--hf-text)] mono">New Commit</h3>
                 <span className="text-[var(--hf-text-muted)] text-sm">记录今日心情</span>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">
                 {/* Content Input */}
                 <textarea
                     value={content}
@@ -119,7 +119,7 @@ export default function CreateMoment({ onSuccess, disabled }: CreateMomentProps)
                         e.target.style.height = Math.min(e.target.scrollHeight, 300) + 'px'
                     }}
                     placeholder="今天想记录什么呢...✨"
-                    className="hf-input min-h-32 resize-none"
+                    className="hf-input min-h-[100px] flex-1 resize-none"
                     style={{ maxHeight: '300px', overflowY: 'auto' }}
                     required
                 />

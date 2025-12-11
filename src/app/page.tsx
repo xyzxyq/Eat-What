@@ -1,6 +1,21 @@
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { verifyToken } from '@/lib/auth'
 import LoginForm from '@/components/LoginForm'
 
-export default function HomePage() {
+export default async function HomePage() {
+  // 检查是否已登录
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth-token')?.value
+
+  if (token) {
+    const payload = await verifyToken(token)
+    if (payload) {
+      // 已登录，重定向到 timeline
+      redirect('/timeline')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[var(--hf-bg)] flex flex-col">
       {/* Header */}

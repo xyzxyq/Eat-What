@@ -48,17 +48,26 @@ export default function LoginForm() {
 
             setMessage(data.message)
 
-            // 检查是否需要邮箱绑定
-            if (data.needEmailBinding) {
+            // 检查是否需要密码验证/设置
+            if (data.requirePassword) {
+                // 存储临时认证数据到 sessionStorage
+                sessionStorage.setItem('temp-auth', JSON.stringify({
+                    tempToken: data.tempToken,
+                    hasPassword: data.hasPassword,
+                    user: data.user
+                }))
+
+                // 跳转到密码页面
                 setTimeout(() => {
-                    setShowEmailBinding(true)
-                    setLoading(false)
+                    router.push('/password')
                 }, 1000)
-            } else {
-                setTimeout(() => {
-                    router.push('/timeline')
-                }, 1500)
+                return
             }
+
+            // 如果不需要密码（向后兼容，正常情况不会走到这里）
+            setTimeout(() => {
+                router.push('/timeline')
+            }, 1500)
 
         } catch {
             setError('网络错误，请稍后重试 🌐')

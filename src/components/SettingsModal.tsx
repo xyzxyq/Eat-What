@@ -44,6 +44,13 @@ export default function SettingsModal({ isOpen, onClose, onSettingsChange }: Set
     const [emailStep, setEmailStep] = useState<'input' | 'verify'>('input')
     const [countdown, setCountdown] = useState(0)
 
+    // 修改密码状态
+    const [showPasswordChange, setShowPasswordChange] = useState(false)
+    const [currentPassword, setCurrentPassword] = useState('')
+    const [newPassword, setNewPassword] = useState('')
+    const [confirmNewPassword, setConfirmNewPassword] = useState('')
+    const [passwordSaving, setPasswordSaving] = useState(false)
+
     // 主题状态
     const [currentTheme, setCurrentTheme] = useState('yellow')
     const [effectIntensity, setEffectIntensity] = useState<'subtle' | 'obvious'>('subtle')
@@ -129,6 +136,8 @@ export default function SettingsModal({ isOpen, onClose, onSettingsChange }: Set
             })
             setCurrentTheme(themeId)
             document.documentElement.setAttribute('data-theme', themeId === 'yellow' ? '' : themeId)
+            // 通知父组件主题已更改
+            onSettingsChange?.()
         } catch (e) {
             console.error('Failed to update theme:', e)
         }
@@ -210,6 +219,47 @@ export default function SettingsModal({ isOpen, onClose, onSettingsChange }: Set
 
     const handleExport = () => {
         window.open('/api/user/export', '_blank')
+    }
+
+    const handleChangePassword = async () => {
+        if (!newPassword || newPassword.length < 6) {
+            setError('新密码长度至少6位 🔐')
+            return
+        }
+        if (newPassword !== confirmNewPassword) {
+            setError('两次输入的密码不一致 😅')
+            return
+        }
+
+        setPasswordSaving(true)
+        setError('')
+        setMessage('')
+
+        try {
+            const res = await fetch('/api/auth/change-password', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    currentPassword: currentPassword || undefined,
+                    newPassword
+                })
+            })
+            const data = await res.json()
+            if (res.ok) {
+                setMessage(data.message || '密码修改成功 🎉')
+                setShowPasswordChange(false)
+                setCurrentPassword('')
+                setNewPassword('')
+                setConfirmNewPassword('')
+                setTimeout(() => setMessage(''), 3000)
+            } else {
+                setError(data.error || '修改失败')
+            }
+        } catch {
+            setError('网络错误')
+        } finally {
+            setPasswordSaving(false)
+        }
     }
 
     const handleLogout = async () => {
@@ -465,6 +515,85 @@ export default function SettingsModal({ isOpen, onClose, onSettingsChange }: Set
                                             </span>
                                         </div>
                                     </div>
+
+                                    {/* 修改密码 */}
+                                    {!showPasswordChange ? (
+                                        <button
+                                            onClick={() => setShowPasswordChange(true)}
+                                            className="w-full p-4 bg-[var(--hf-bg)] rounded-xl text-left hover:bg-opacity-80 transition"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="flex items-center gap-3">
+                                                    <span className="text-xl">🔐</span>
+                                                    <span className="text-sm text-[var(--hf-text)]">修改登录密码</span>
+                                                </span>
+                                                <span className="text-[var(--hf-text-muted)]">→</span>
+                                            </div>
+                                        </button>
+                                    ) : (
+                                        <div className="p-4 bg-[var(--hf-bg)] rounded-xl space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-medium text-[var(--hf-text)]">修改密码</span>
+                                                <button
+                                                    onClick={() => {
+                                                        setShowPasswordChange(false)
+                                                        setCurrentPassword('')
+                                                        setNewPassword('')
+                                                        setConfirmNewPassword('')
+                                                    }}
+                                                    className="text-xs text-[var(--hf-text-muted)] hover:text-[var(--hf-text)]"
+                                                >
+                                                    取消
+                                                </button>
+                                            </div>
+
+                                            {/* 当前密码 */}
+                                            <div className="space-y-1">
+                                                <label className="text-xs text-[var(--hf-text-muted)]">当前密码（首次设置可留空）</label>
+                                                <input
+                                                    type="password"
+                                                    value={currentPassword}
+                                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                                    placeholder="输入当前密码..."
+                                                    className="hf-input"
+                                                />
+                                            </div>
+
+                                            {/* 新密码 */}
+                                            <div className="space-y-1">
+                                                <label className="text-xs text-[var(--hf-text-muted)]">新密码（至少6位）</label>
+                                                <input
+                                                    type="password"
+                                                    value={newPassword}
+                                                    onChange={(e) => setNewPassword(e.target.value)}
+                                                    placeholder="输入新密码..."
+                                                    className="hf-input"
+                                                    minLength={6}
+                                                />
+                                            </div>
+
+                                            {/* 确认新密码 */}
+                                            <div className="space-y-1">
+                                                <label className="text-xs text-[var(--hf-text-muted)]">确认新密码</label>
+                                                <input
+                                                    type="password"
+                                                    value={confirmNewPassword}
+                                                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                                                    placeholder="再次输入新密码..."
+                                                    className="hf-input"
+                                                    minLength={6}
+                                                />
+                                            </div>
+
+                                            <button
+                                                onClick={handleChangePassword}
+                                                disabled={passwordSaving || !newPassword || !confirmNewPassword}
+                                                className="hf-button w-full justify-center"
+                                            >
+                                                {passwordSaving ? '保存中...' : '保存新密码'}
+                                            </button>
+                                        </div>
+                                    )}
 
                                     <button
                                         onClick={handleExport}

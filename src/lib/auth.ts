@@ -12,11 +12,39 @@ export interface TokenPayload {
     [key: string]: unknown
 }
 
+export interface TempTokenPayload {
+    userId: string
+    coupleSpaceId: string
+    type: 'temp'
+    [key: string]: unknown
+}
+
 export async function createToken(payload: TokenPayload): Promise<string> {
     return new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setExpirationTime('30d')
         .sign(secret)
+}
+
+// 创建临时令牌（5分钟过期）- 用于密码验证前的过渡
+export async function createTempToken(payload: { userId: string; coupleSpaceId: string }): Promise<string> {
+    return new SignJWT({ ...payload, type: 'temp' })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime('5m')
+        .sign(secret)
+}
+
+// 验证临时令牌
+export async function verifyTempToken(token: string): Promise<TempTokenPayload | null> {
+    try {
+        const { payload } = await jwtVerify(token, secret)
+        if (payload.type !== 'temp') {
+            return null
+        }
+        return payload as unknown as TempTokenPayload
+    } catch {
+        return null
+    }
 }
 
 export async function verifyToken(token: string): Promise<TokenPayload | null> {

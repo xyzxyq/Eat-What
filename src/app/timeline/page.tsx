@@ -95,7 +95,10 @@ export default function TimelinePage() {
                 const data = await res.json()
                 setEffectIntensity(data.effectIntensity || 'subtle')
                 setEffectArea(data.effectArea || 'local')
-                setCurrentTheme(data.theme || 'yellow')
+                const theme = data.theme || 'yellow'
+                setCurrentTheme(theme)
+                // 立即应用主题到 document
+                document.documentElement.setAttribute('data-theme', theme === 'yellow' ? '' : theme)
             }
         } catch (e) {
             console.error('Failed to fetch effect settings:', e)
@@ -230,7 +233,7 @@ export default function TimelinePage() {
                 )}
 
                 {/* Couple Status Card */}
-                <div className="mb-6 relative">
+                <div className="mb-6 relative mt-2" style={{ overflow: 'visible' }}>
                     {/* 局部效果也可以放在CoupleCard周围 */}
                     <CoupleCard
                         currentUser={currentUser}

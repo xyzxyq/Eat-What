@@ -29,6 +29,7 @@ model User {
   id                  String              @id @default(uuid())
   nickname            String
   displayName         String?
+  passwordHash        String?             // 用户密码哈希，可空以兼容老用户
   gender              String?
   avatarEmoji         String              @default("💕")
   avatarUrl           String?

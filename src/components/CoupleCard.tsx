@@ -146,10 +146,11 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                     background: linear-gradient(135deg, var(--hf-yellow-light) 0%, white 50%, var(--hf-yellow-light) 100%);
                     border-radius: 20px;
                     padding: 20px;
+                    padding-top: 30px;
                     border: 2px solid var(--hf-yellow);
                     box-shadow: ${effectGlowStyle};
                     position: relative;
-                    overflow: hidden;
+                    overflow: visible;
                     transition: box-shadow 0.5s ease, border-color 0.5s ease;
                 }
 
@@ -176,6 +177,8 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                     height: 200%;
                     background: radial-gradient(circle, ${themeConfig.shimmerColor} 0%, transparent 70%);
                     animation: shimmer 8s ease-in-out infinite;
+                    pointer-events: none;
+                    z-index: 0;
                 }
 
                 @keyframes shimmer {
@@ -482,10 +485,9 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 @media (max-width: 480px) {
                     .couple-card {
                         padding: 16px 12px;
-                        padding-top: 28px;
+                        padding-top: 36px;
                         border-radius: 16px;
-                        overflow-x: hidden;
-                        overflow-y: visible;
+                        overflow: visible;
                     }
 
                     .avatar-container {
@@ -551,7 +553,8 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 @media (max-width: 375px) {
                     .couple-card {
                         padding: 14px 10px;
-                        padding-top: 26px;
+                        padding-top: 34px;
+                        overflow: visible;
                     }
 
                     .avatar-container {
@@ -597,7 +600,7 @@ export default function CoupleCard({ currentUser, partner, onAvatarClick, theme 
                 <div key={`orbit-${i}`} className="orbit-emoji">{emoji}</div>
             ))}
 
-            <div className="flex items-center justify-center gap-2 sm:gap-4 relative z-10">
+            <div className="flex items-center justify-center gap-2 sm:gap-4 relative z-10 mt-2">
                 {/* Current User */}
                 {currentUser ? (
                     <div className="avatar-container">

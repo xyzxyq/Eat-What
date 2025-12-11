@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { createToken } from '@/lib/auth'
+import { createTempToken } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
 
 // 生成6位随机绑定码
@@ -75,66 +75,54 @@ export async function POST(request: NextRequest) {
             })
 
             const user = coupleSpace.users[0]
-            const token = await createToken({
+
+            // 创建临时令牌，引导用户设置密码
+            const tempToken = await createTempToken({
                 userId: user.id,
-                nickname: user.nickname,
                 coupleSpaceId: coupleSpace.id
             })
 
-            const response = NextResponse.json({
+            return NextResponse.json({
                 success: true,
-                message: '🎉 新的情侣空间已创建！等待你的另一半加入...',
+                message: '🎉 新的情侣空间已创建！请设置登录密码...',
+                requirePassword: true,
+                tempToken,
+                hasPassword: false,  // 新用户没有密码
                 user: {
-                    id: user.id,
                     nickname: user.nickname,
-                    avatarEmoji: user.avatarEmoji
+                    avatarEmoji: user.avatarEmoji,
+                    avatarUrl: user.avatarUrl
                 },
                 isNewSpace: true,
-                inviteCode: newInviteCode,  // 返回绑定码给第一个用户
-                needEmailBinding: true
+                inviteCode: newInviteCode
             })
-
-            response.cookies.set('auth-token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 30 * 24 * 60 * 60
-            })
-
-            return response
         }
 
         // 空间存在，检查用户是否已在空间中
         const existingUser = coupleSpace.users.find((u: { nickname: string }) => u.nickname === nickname)
 
         if (existingUser) {
-            // 用户已存在，直接登录（不需要绑定码）
-            const token = await createToken({
+            // 用户已存在，返回临时令牌让用户验证/设置密码
+            const tempToken = await createTempToken({
                 userId: existingUser.id,
-                nickname: existingUser.nickname,
                 coupleSpaceId: coupleSpace.id
             })
 
-            const response = NextResponse.json({
+            return NextResponse.json({
                 success: true,
-                message: `💕 欢迎回来，${existingUser.nickname}！`,
+                message: existingUser.passwordHash
+                    ? `🔐 请输入密码，${existingUser.nickname}！`
+                    : `🔐 请设置登录密码，${existingUser.nickname}！`,
+                requirePassword: true,
+                tempToken,
+                hasPassword: !!existingUser.passwordHash,
                 user: {
-                    id: existingUser.id,
                     nickname: existingUser.nickname,
-                    avatarEmoji: existingUser.avatarEmoji
+                    avatarEmoji: existingUser.avatarEmoji,
+                    avatarUrl: existingUser.avatarUrl
                 },
-                isNewSpace: false,
-                needEmailBinding: !existingUser.isEmailVerified
+                isNewSpace: false
             })
-
-            response.cookies.set('auth-token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge: 30 * 24 * 60 * 60
-            })
-
-            return response
         }
 
         // 检查空间是否已满
@@ -150,7 +138,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     error: '需要输入绑定码才能加入此空间 🔐',
-                    requireInviteCode: true  // 告诉前端需要显示绑定码输入框
+                    requireInviteCode: true
                 },
                 { status: 400 }
             )
@@ -173,33 +161,26 @@ export async function POST(request: NextRequest) {
             }
         })
 
-        const token = await createToken({
+        // 创建临时令牌，引导用户设置密码
+        const tempToken = await createTempToken({
             userId: newUser.id,
-            nickname: newUser.nickname,
             coupleSpaceId: coupleSpace.id
         })
 
-        const response = NextResponse.json({
+        return NextResponse.json({
             success: true,
-            message: `🎊 成功加入情侣空间！现在你们可以一起记录美好时光了！`,
+            message: `🎊 成功加入情侣空间！请设置登录密码...`,
+            requirePassword: true,
+            tempToken,
+            hasPassword: false,  // 新用户没有密码
             user: {
-                id: newUser.id,
                 nickname: newUser.nickname,
-                avatarEmoji: newUser.avatarEmoji
+                avatarEmoji: newUser.avatarEmoji,
+                avatarUrl: newUser.avatarUrl
             },
             isNewSpace: false,
-            partnerJoined: true,
-            needEmailBinding: true
+            partnerJoined: true
         })
-
-        response.cookies.set('auth-token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 30 * 24 * 60 * 60
-        })
-
-        return response
 
     } catch (error) {
         console.error('Login error:', error)
